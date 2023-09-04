@@ -1,5 +1,5 @@
 def NFL_NN_SPREAD_PREDICTOR(home_team_input,away_team_input):    
-    import Statlete
+    from Class_Statlete import Statlete
     import numpy as np 
     import pandas as pd
     import sportsdataverse.nfl as nfl
@@ -13,8 +13,8 @@ def NFL_NN_SPREAD_PREDICTOR(home_team_input,away_team_input):
     import keras
     from sklearn.model_selection import train_test_split
     import elo_scrape as elo_funs
-    
-    
+
+
     class Team:
         import numpy as np 
         import pandas as pd
@@ -172,7 +172,7 @@ def NFL_NN_SPREAD_PREDICTOR(home_team_input,away_team_input):
 
     df_numeric['elo'] = 0
     df_numeric['opp_elo'] = 0
-    
+
     if  Team(f'{home_team_input}').team_abr == 'LV':
         home_elo = hist_elo[(hist_elo.team1 == 'OAK') | (hist_elo.team2 == 'OAK')]
     else:
@@ -458,7 +458,7 @@ def NFL_NN_SPREAD_PREDICTOR(home_team_input,away_team_input):
 
     df2_numeric['elo'] = 0
     df2_numeric['opp_elo'] = 0
-    
+
     if  Team(f'{home_team_input}').team_abr == 'LV':
         away_elo = hist_elo[(hist_elo.team1 == 'OAK' ) | (hist_elo.team2 == 'OAK')]
     else:
@@ -670,7 +670,7 @@ def NFL_NN_SPREAD_PREDICTOR(home_team_input,away_team_input):
     #return print(yhat_home), print(yhat_away)
     Spread_Predictions = pd.DataFrame(data = output_data,index=np.arange(0,1))
     Spread_Predictions['Midpoint'] = round(( (Spread_Predictions[f'{home_team_input}_Spread'] + Spread_Predictions[f'{away_team_input}_Spread'] )/2),1)
-    
+
 
     return Spread_Predictions
 
