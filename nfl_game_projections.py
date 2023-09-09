@@ -166,32 +166,32 @@ def get_current_elo(input_season):
       [    1465]] #WSH Commanders
     else:
       elo_list = [
-      [    1362], #Arizona Cardinals
-      [    1452], #Atlanta Falcons
-      [    1571], #Baltimore Ravens
-      [    1692], #Buffalo Bills
-      [    1481], #Carolina Panthers
-      [    1315], #Chicago Bears
+      [    1320], #Arizona Cardinals
+      [    1480], #Atlanta Falcons
+      [    1600], #Baltimore Ravens
+      [    1675], #Buffalo Bills
+      [    1400], #Carolina Panthers
+      [    1375], #Chicago Bears
       [    1730], #Cincinatti Bengals
-      [    1545], #Cleveland Browns
-      [    1600], #Dallas Cowboys
-      [    1356], #Denver Broncos
-      [    1528], #Detroit Lions
-      [    1473], #Green Bay 
+      [    1575], #Cleveland Browns
+      [    1575], #Dallas Cowboys
+      [    1475], #Denver Broncos
+      [    1575], #Detroit Lions
+      [    1450], #Green Bay 
       [    1391], #Houston Texans
       [    1319], #Indianapolis Colts
-      [    1512], #Jax Jaguars
+      [    1550], #Jax Jaguars
       [    1705], #KC Chiefs
-      [    1430], #LV Raiders
-      [    1550], #LA Chargers
-      [    1436], #LA Rams
-      [    1503], #Miami Dolphins
-      [    1570], #Minn Vikings
+      [    1400], #LV Raiders
+      [    1580], #LA Chargers
+      [    1410], #LA Rams
+      [    1525], #Miami Dolphins
+      [    1550], #Minn Vikings
       [    1500], #NE Patriots
       [    1504], #NO Saints
-      [    1437], #NY Giants
-      [    1500], #NY Jets
-      [    1700], #Philly Eagles
+      [    1475], #NY Giants
+      [    1545], #NY Jets
+      [    1730], #Philly Eagles
       [    1450], #Pitt Steelers
       [    1575], #49ers
       [    1550], #Seahawks
@@ -300,6 +300,41 @@ team_ref_2022['season']=2022
 # team_ref_2023['season']=2023
 
 
+elo_list = [
+      [    1320], #Arizona Cardinals
+      [    1480], #Atlanta Falcons
+      [    1600], #Baltimore Ravens
+      [    1675], #Buffalo Bills
+      [    1400], #Carolina Panthers
+      [    1375], #Chicago Bears
+      [    1730], #Cincinatti Bengals
+      [    1575], #Cleveland Browns
+      [    1575], #Dallas Cowboys
+      [    1475], #Denver Broncos
+      [    1575], #Detroit Lions
+      [    1450], #Green Bay 
+      [    1391], #Houston Texans
+      [    1319], #Indianapolis Colts
+      [    1550], #Jax Jaguars
+      [    1705], #KC Chiefs
+      [    1400], #LV Raiders
+      [    1580], #LA Chargers
+      [    1410], #LA Rams
+      [    1525], #Miami Dolphins
+      [    1550], #Minn Vikings
+      [    1500], #NE Patriots
+      [    1504], #NO Saints
+      [    1475], #NY Giants
+      [    1545], #NY Jets
+      [    1730], #Philly Eagles
+      [    1450], #Pitt Steelers
+      [    1575], #49ers
+      [    1550], #Seahawks
+      [    1440], #TB Buccaneers 
+      [    1450], #Tenn Titans 
+      [    1465]] #WSH Commanders
+
+
 
 
 
@@ -327,6 +362,8 @@ for game in range(1,len(s['games'])):
     home_team_input = f"{s['games'][game]['homeTeam']['fullName']}"
     away_team_input = f"{s['games'][game]['awayTeam']['fullName']}"
 
+    # home_team_input = "New York Giants"
+    # away_team_input = "Dallas Cowboys"
 
 
     # hist_elo = pd.read_csv('nfl_historical_elo.csv')
@@ -529,18 +566,18 @@ for game in range(1,len(s['games'])):
 
 
 
-    model = LinearRegression()
 
-
-    predictors = ['epa', 'epa_allowed', 'passing_yards', 'rushing_yards', 'turnovers', 'takeaways','home_away', 'elo']
-    y = ht_df['points_scored']
-    model = LinearRegression().fit(ht_df[predictors],y)
 
 
 
 
 
     ################## home #####################
+
+    predictors = ['epa', 'epa_allowed', 'passing_yards', 'rushing_yards', 'turnovers', 'takeaways','home_away', 'elo']
+    y = ht_df['points_scored']
+    model_home = LinearRegression().fit(ht_df[predictors],y)
+
 
     exp_epa = (stats.median(ht_df.epa) + stats.median(at_df.epa_allowed))/2
     exp_epa_allowed = (stats.median(ht_df.epa_allowed) + stats.median(at_df.epa))/2
@@ -549,7 +586,7 @@ for game in range(1,len(s['games'])):
     exp_turnovers = (stats.mean(ht_df.turnovers) + stats.mean(at_df.takeaways))/2
     exp_takeaways = (stats.mean(ht_df.takeaways) + stats.mean(at_df.turnovers))/2
 
-    home_score_proj = model.predict(np.array([[exp_epa,exp_epa_allowed,exp_passing_yards,exp_rushing_yards,exp_turnovers,exp_takeaways,1, team_ref_2022.loc[home_team_input,'Current ELO']]]))
+    home_score_proj = model_home.predict(np.array([[exp_epa,exp_epa_allowed,exp_passing_yards,exp_rushing_yards,exp_turnovers,exp_takeaways,1, team_ref_2022.loc[home_team_input,'Current ELO']]]))
 
 
 
@@ -560,6 +597,14 @@ for game in range(1,len(s['games'])):
 
     ################## away #####################
 
+
+    predictors = ['epa', 'epa_allowed', 'passing_yards', 'rushing_yards', 'turnovers', 'takeaways','home_away', 'elo']
+    y = at_df['points_scored']
+    model_away = LinearRegression().fit(at_df[predictors],y)
+
+
+
+
     exp_epa = (stats.median(at_df.epa) + stats.median(ht_df.epa_allowed))/2
     exp_epa_allowed = (stats.median(at_df.epa_allowed) + stats.median(ht_df.epa))/2
     exp_passing_yards = (stats.median(at_df.passing_yards) + stats.median(ht_df.passing_yards_allowed))/2
@@ -569,7 +614,7 @@ for game in range(1,len(s['games'])):
 
 
 
-    away_score_proj = model.predict(np.array([[exp_epa,exp_epa_allowed,exp_passing_yards,exp_rushing_yards,exp_turnovers,exp_takeaways,0, team_ref_2022.loc[away_team_input,'Current ELO']]]))
+    away_score_proj = model_away.predict(np.array([[exp_epa,exp_epa_allowed,exp_passing_yards,exp_rushing_yards,exp_turnovers,exp_takeaways,0, team_ref_2022.loc[away_team_input,'Current ELO']]]))
 
 
 
