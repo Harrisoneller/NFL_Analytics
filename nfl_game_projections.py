@@ -576,7 +576,12 @@ for game in range(1,len(s['games'])):
 
     predictors = ['epa', 'epa_allowed', 'passing_yards', 'rushing_yards', 'turnovers', 'takeaways','home_away', 'elo']
     y = ht_df['points_scored']
-    model_home = LinearRegression().fit(ht_df[predictors],y)
+    weights = np.ones(len(ht_df))
+    for i in range(len(weights)-1):
+        weights[i+1] = weights[i] + .5 
+        
+
+    model_home = LinearRegression().fit(ht_df[predictors],y,sample_weight=weights)
 
 
     exp_epa = (stats.median(ht_df.epa) + stats.median(at_df.epa_allowed))/2
@@ -600,7 +605,10 @@ for game in range(1,len(s['games'])):
 
     predictors = ['epa', 'epa_allowed', 'passing_yards', 'rushing_yards', 'turnovers', 'takeaways','home_away', 'elo']
     y = at_df['points_scored']
-    model_away = LinearRegression().fit(at_df[predictors],y)
+    weights = np.ones(len(at_df))
+    for i in range(len(weights)-1):
+        weights[i+1] = weights[i] + .5
+    model_away = LinearRegression().fit(at_df[predictors],y, sample_weight=weights)
 
 
 
@@ -636,7 +644,7 @@ for game in range(1,len(s['games'])):
 
 
 
-
+df
 
 
 
