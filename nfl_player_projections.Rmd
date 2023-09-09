@@ -1,0 +1,286 @@
+---
+title: "NFL Projections"
+author: "Harrison Eller"
+date: "2023-09-07"
+output: html_document
+---
+
+## R Markdown
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(rmarkdown)
+library(dplyr)
+library(readr)
+library(caret)
+library(car)
+library(tidyverse)
+library(gt)
+library(reticulate)
+setwd("C:/Users/Harrison Eller/NFL_Analytics")
+```
+
+
+
+```{python}
+import sportsdataverse.nfl as nfl 
+import pandas as pd
+import numpy as np 
+
+passing = pd.read_csv('passing.csv')
+passing = passing[passing['season'] > 2017]
+
+
+```
+
+```{python}
+test = passing[passing.player_display_name == 'Jared Goff']
+```
+
+
+```{r}
+hist(py$test$passing_yards)
+```
+
+
+```{python}
+
+home_team_input = 'Kansas City Chiefs'
+away_team_input = 'Detroit Lions' 
+
+
+import numpy as np 
+import pandas as pd
+import sportsdataverse.nfl as nfl
+import scipy
+import difflib
+import json
+import numpy as np
+#import matplotlib.pyplot as plt
+import time
+
+
+class Team:
+    import numpy as np 
+    import pandas as pd
+    import sportsdataverse.nfl as nfl
+    import scipy
+    import difflib
+    import json
+
+    #teams_info = nfl.nfl_loaders.load_nfl_teams()
+
+    def __init__(self,team):
+        teams_info = pd.read_csv('teams_info.csv')
+        team = difflib.get_close_matches(team, teams_info.team_name.unique(), n=1, cutoff=0.6)
+        self.team = team
+        self.team_abr = list(teams_info.team_abbr[teams_info.team_name.isin(self.team)])[0]
+        #self.game = self.Game(team)
+        self.season = self.Season(team)
+        
+        
+        
+    class Season:       
+        ID = nfl.load_nfl_players()
+        stats = nfl.load_nfl_player_stats()
+        ngs = nfl.load_nfl_ngs_receiving() 
+        
+        def __init__(self, team):
+            teams_info = pd.read_csv('teams_info.csv')
+            team = difflib.get_close_matches(team, teams_info.team_name.unique(), n=1, cutoff=0.6)
+            self.team_season = team
+            self.team_abr_season = teams_info.team_abbr[teams_info.team_name.isin(team)]
+            #self.player_ngs = player_ngs 
+
+        def get_data(self, season = [2022,2023]):
+            pbp = nfl.load_nfl_pbp(seasons=(season))
+            team_pbp = pbp[(pbp.home_team.isin(self.team_abr_season)) | (pbp.away_team.isin(self.team_abr_season))]
+            team_off_pbp = team_pbp[(team_pbp.posteam.isin(self.team_abr_season)) | (team_pbp.defteam.isin(self.team_abr_season)) ]
+            
+            
+            #output1 = player_df[player_df['week'] == week]  
+            try:
+                df = team_off_pbp
+            except:
+                df = team_off_pbp
+            return df
+  
+    
+# hist_elo = pd.read_csv('nfl_historical_elo.csv')
+# hist_elo = hist_elo[hist_elo.season > 2020]
+
+# ############################################################### data preparation
+TEAM = Team(f'{home_team_input}')
+try:
+    dfh = Team.Season(f'{home_team_input}').get_data()
+except:
+    try:
+        dfh = Team.Season(f'{home_team_input}').get_data()
+    except:
+        try:
+            dfh = Team.Season(f'{home_team_input}').get_data()
+        except:
+            try:
+                dfh = Team.Season(f'{home_team_input}').get_data()
+            except:         
+                try:
+                    dfh = Team.Season(f'{home_team_input}').get_data()
+                except:              
+                    try:
+                        dfh = Team.Season(f'{home_team_input}').get_data()
+                    except:             
+                        try:
+                            dfh = Team.Season(f'{home_team_input}').get_data()
+                        except:   
+                            pass                                                        
+
+data_sum_off = ['game_id','air_yards','epa','passing_yards','rushing_yards','receiving_yards','interception','fumble_lost','touchdown','score_differential']
+data_sum_def = ['game_id','interception','fumble_lost','epa','passing_yards','rushing_yards','receiving_yards']
+
+
+off=dfh[dfh['posteam']==Team(f'{home_team_input}').team_abr]
+defense=dfh[dfh['defteam']==Team(f'{home_team_input}').team_abr]
+
+
+df_o = off[data_sum_off].groupby(by=['game_id']).sum()
+df_d = defense[data_sum_def].groupby(by=['game_id']).sum()
+df_d = df_d.rename(columns = {'interception':'interceptions_gained','fumble_lost':'fumble_gained','epa':'epa_allowed','passing_yards':'passing_yards_allowed','rushing_yards':'rushing_yards_allowed','receiving_yards':'receiving_yards_allowed'} )
+
+
+for GID in df_o.index:
+
+    df_o.loc[GID,'score_differential'] = off[off['game_id'] == GID].score_differential.iloc[len(off[off.index == GID])-1]
+    if all(off.loc[off.game_id == GID,'home_team'] == Team(f'{home_team_input}').team_abr):
+      df_o.loc[GID,'points_scored'] = max(off.loc[off.game_id == GID,'total_home_score'].dropna())
+      df_d.loc[GID,'points_allowed'] = max(off.loc[off.game_id == GID,'total_away_score'].dropna())
+    else:
+      df_d.loc[GID,'points_allowed'] = max(off.loc[off.game_id == GID,'total_home_score'].dropna())
+      df_o.loc[GID,'points_scored'] = max(off.loc[off.game_id == GID,'total_away_score'].dropna())
+
+
+
+# for GID in df_o.index:
+#     df_o.loc[GID,'score_differential'] = off[off['game_id'] == GID].score_differential.iloc[len(off[off.index == GID])-1]
+
+
+
+ht_df = pd.concat([df_o,df_d],axis=1)
+
+
+
+
+
+
+
+
+
+# ############################################################### data preparation
+TEAM = Team(f'{away_team_input}')
+try:
+    dfa = Team.Season(f'{away_team_input}').get_data()
+except:
+    try:
+        dfa = Team.Season(f'{away_team_input}').get_data()
+    except:
+        try:
+            dfa = Team.Season(f'{away_team_input}').get_data()
+        except:
+            try:
+                dfa = Team.Season(f'{away_team_input}').get_data()
+            except:         
+                try:
+                    dfa = Team.Season(f'{away_team_input}').get_data()
+                except:              
+                    try:
+                        dfa = Team.Season(f'{away_team_input}').get_data()
+                    except:             
+                        try:
+                            dfa = Team.Season(f'{away_team_input}').get_data()
+                        except:   
+                            pass                                                        
+
+data_sum_off = ['game_id','air_yards','epa','passing_yards','rushing_yards','receiving_yards','interception','fumble_lost','touchdown','score_differential']
+data_sum_def = ['game_id','interception','fumble_lost','epa','passing_yards','rushing_yards','receiving_yards']
+
+off=dfa[dfa['posteam']==Team(f'{away_team_input}').team_abr]
+
+
+defense=dfa[dfa['defteam']==Team(f'{away_team_input}').team_abr]
+
+df_o = off[data_sum_off].groupby(by=['game_id']).sum()
+df_o['points_scored'] = 0
+df_d['points_allowed'] = 0
+
+df_d = defense[data_sum_def].groupby(by=['game_id']).sum()
+df_d = df_d.rename(columns = {'interception':'interceptions_gained','fumble_lost':'fumble_gained','epa':'epa_allowed','passing_yards':'passing_yards_allowed','rushing_yards':'rushing_yards_allowed','receiving_yards':'receiving_yards_allowed'} )
+
+
+for GID in df_o.index:
+
+    df_o.loc[GID,'score_differential'] = off[off['game_id'] == GID].score_differential.iloc[len(off[off.index == GID])-1]
+    if all(off.loc[off.game_id == GID,'home_team'] == Team(f'{away_team_input}').team_abr):
+      df_o.loc[GID,'points_scored'] = max(off.loc[off.game_id == GID,'total_home_score'].dropna())
+      df_d.loc[GID,'points_allowed'] = max(off.loc[off.game_id == GID,'total_away_score'].dropna())
+    else:
+      df_d.loc[GID,'points_allowed'] = max(off.loc[off.game_id == GID,'total_home_score'].dropna())
+      df_o.loc[GID,'points_scored'] = max(off.loc[off.game_id == GID,'total_away_score'].dropna())
+
+
+
+
+at_df = pd.concat([df_o,df_d],axis=1)
+
+
+ht_df['turnovers'] = ht_df.fumble_lost + ht_df.interception
+at_df['turnovers'] = at_df.fumble_lost + at_df.interception
+ht_df['takeaways'] = ht_df.fumble_gained + ht_df.interceptions_gained
+at_df['takeaways'] = at_df.fumble_gained + at_df.interceptions_gained
+
+
+import scipy
+import statistics as stats
+
+#################### home team ################################################
+
+
+
+
+
+
+```
+
+```{r}
+home_model <- lm(points_scored~epa+passing_yards+rushing_yards+turnovers+takeaways,data=py$ht_df)
+away_model <- lm(points_scored~epa+passing_yards+rushing_yards+turnovers+takeaways,data=py$at_df)
+
+summary(home_model)
+home_model$coefficients
+```
+
+```{python}
+exp_epa = (stats.median(ht_df.epa) + stats.median(at_df.epa_allowed))/2
+exp_passing_yards = (stats.median(ht_df.passing_yards) + stats.median(at_df.passing_yards_allowed))/2
+exp_rushing_yards = (stats.median(ht_df.rushing_yards) + stats.median(at_df.rushing_yards_allowed))/2
+exp_turnovers = (stats.mean(ht_df.turnovers) + stats.mean(at_df.takeaways))/2
+exp_takeaways = (stats.mean(ht_df.takeaways) + stats.mean(at_df.turnovers))/2
+
+ht_df.points_scored
+
+exp_epa*(r.home_model['coefficients'][1])+exp_passing_yards*(r.home_model['coefficients'][2])+exp_rushing_yards*(r.home_model['coefficients'][3])+exp_turnovers*(r.home_model['coefficients'][4])+exp_takeaways*(r.home_model['coefficients'][5])+ r.home_model['coefficients'][0]
+
+
+
+
+
+exp_epa = (stats.median(at_df.epa) + stats.median(ht_df.epa_allowed))/2
+exp_passing_yards = (stats.median(at_df.passing_yards) + stats.median(ht_df.passing_yards_allowed))/2
+exp_rushing_yards = (stats.median(at_df.rushing_yards) + stats.median(ht_df.rushing_yards_allowed))/2
+exp_turnovers = (stats.mean(at_df.turnovers) + stats.mean(ht_df.takeaways))/2
+exp_takeaways = (stats.mean(at_df.takeaways) + stats.mean(ht_df.turnovers))/2
+
+
+
+exp_epa*(r.away_model['coefficients'][1])+exp_passing_yards*(r.away_model['coefficients'][2])+exp_rushing_yards*(r.away_model['coefficients'][3])+exp_turnovers*(r.away_model['coefficients'][4])+exp_takeaways*(r.away_model['coefficients'][5]) + r.away_model['coefficients'][0]
+
+```
+
