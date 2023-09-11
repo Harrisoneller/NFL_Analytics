@@ -47,7 +47,7 @@ NFL_table_clean <- NFL_table %>%
   ### Remove team division names from Tm column
   filter(str_detect(Tm, "FC", negate = TRUE)) %>%
   ### Add column to say if team made playoffs based off of pre-existing asterisks
-  mutate(Playoffs = ifelse(str_detect(Tm, "[*+]"), "Yes", "No")) %>%
+  mutate(Projection = ifelse(str_detect(Tm, "[*+]"), "Yes", "No")) %>%
   ### Remove asterisks and plus signs next to team names
   mutate(Tm = gsub("[*+]", "", Tm)) %>%
   rename(Record = `W-L%`) %>%
@@ -70,7 +70,7 @@ NFL_table_clean <- NFL_table %>%
     Division,
     Team,
     Record,
-    Playoffs,
+    Projection,
     SoS_rating,
     PF,
     PA,
@@ -89,35 +89,68 @@ NFL_table_clean <- NFL_table %>%
 
 
 
-model_pred = read.csv("C:\\Users\\harri\\sports-app-server\\week1_model_pred.csv")
+# model_pred = read.csv("C:\\Users\\harri\\sports-app-server\\week1_model_pred.csv")
+# 
+# for (row in 1:nrow(NFL_table_clean)){
+# 
+#   if (NFL_table_clean$Team[row] %in% word( model_pred$Home_Team,-1) ){
+#     ht = model_pred$Home_Team[amatch(NFL_table_clean$Team[row] ,word( model_pred$Home_Team,-1), maxDist = 2)]
+#     at = model_pred$Away_Team[amatch(NFL_table_clean$Team[row] ,word( model_pred$Home_Team,-1), maxDist = 2)]
+#     away_spread = model_pred$Away_Spread[amatch(NFL_table_clean$Team[row] ,word( model_pred$Home_Team,-1), maxDist = 2)]
+#     home_spread = model_pred$Home_Spread[amatch(NFL_table_clean$Team[row] ,word( model_pred$Home_Team,-1), maxDist = 2)]
+#     midpoint = model_pred$Midpoint[amatch(NFL_table_clean$Team[row] ,word( model_pred$Home_Team,-1), maxDist = 2)]
+# 
+#     NFL_table_clean$Playoffs[row] = ifelse( home_spread <  away_spread, -abs(midpoint), abs(midpoint) )
+#   }else{
+#     ht = model_pred$Home_Team[amatch(NFL_table_clean$Team[row] ,word( model_pred$Away_Team,-1), maxDist = 2)]
+#     at = model_pred$Away_Team[amatch(NFL_table_clean$Team[row] ,word( model_pred$Away_Team,-1), maxDist = 2)]
+#     away_spread = model_pred$Away_Spread[amatch(NFL_table_clean$Team[row] ,word( model_pred$Away_Team,-1), maxDist = 2)]
+#     home_spread = model_pred$Home_Spread[amatch(NFL_table_clean$Team[row] ,word( model_pred$Away_Team,-1), maxDist = 2)]
+#     midpoint = model_pred$Midpoint[amatch(NFL_table_clean$Team[row] ,word( model_pred$Away_Team,-1), maxDist = 2)]
+# 
+#     NFL_table_clean$Playoffs[row] = ifelse( away_spread <  home_spread, -abs(midpoint), abs(midpoint) )
+#   }
+# 
+# }
+# 
+# 
+# 
+# NFL_table_clean <- NFL_table_clean %>% rename_at('Playoffs', ~'Model')
+```
+
+
+```{r}
+model_pred = read.csv("C:\\Users\\Harrison Eller\\NFL_Analytics\\model_pred.csv")
 
 for (row in 1:nrow(NFL_table_clean)){
 
   if (NFL_table_clean$Team[row] %in% word( model_pred$Home_Team,-1) ){
     ht = model_pred$Home_Team[amatch(NFL_table_clean$Team[row] ,word( model_pred$Home_Team,-1), maxDist = 2)]
     at = model_pred$Away_Team[amatch(NFL_table_clean$Team[row] ,word( model_pred$Home_Team,-1), maxDist = 2)]
-    away_spread = model_pred$Away_Spread[amatch(NFL_table_clean$Team[row] ,word( model_pred$Home_Team,-1), maxDist = 2)]
-    home_spread = model_pred$Home_Spread[amatch(NFL_table_clean$Team[row] ,word( model_pred$Home_Team,-1), maxDist = 2)]
-    midpoint = model_pred$Midpoint[amatch(NFL_table_clean$Team[row] ,word( model_pred$Home_Team,-1), maxDist = 2)]
+    away_spread = model_pred$Away_Score[amatch(NFL_table_clean$Team[row] ,word( model_pred$Home_Team,-1), maxDist = 2)] - model_pred$Home_Score[amatch(NFL_table_clean$Team[row] ,word( model_pred$Home_Team,-1), maxDist = 2)]
+    home_spread = model_pred$Home_Score[amatch(NFL_table_clean$Team[row] ,word( model_pred$Home_Team,-1), maxDist = 2)] - model_pred$Away_Score[amatch(NFL_table_clean$Team[row] ,word( model_pred$Home_Team,-1), maxDist = 2)]  
+    
+    #midpoint = model_pred$Midpoint[amatch(NFL_table_clean$Team[row] ,word( model_pred$Home_Team,-1), maxDist = 2)]
 
-    NFL_table_clean$Playoffs[row] = ifelse( home_spread <  away_spread, -abs(midpoint), abs(midpoint) )
+    #NFL_table_clean$Playoffs[row] = ifelse( home_spread <  away_spread, -abs(midpoint), abs(midpoint) )
+    NFL_table_clean$Projection[row] = ifelse(home_spread < 0, paste("+",as.character(round(home_spread,1)),sep=""), paste("-",as.character(round(home_spread,1)),sep=""))
   }else{
     ht = model_pred$Home_Team[amatch(NFL_table_clean$Team[row] ,word( model_pred$Away_Team,-1), maxDist = 2)]
     at = model_pred$Away_Team[amatch(NFL_table_clean$Team[row] ,word( model_pred$Away_Team,-1), maxDist = 2)]
-    away_spread = model_pred$Away_Spread[amatch(NFL_table_clean$Team[row] ,word( model_pred$Away_Team,-1), maxDist = 2)]
-    home_spread = model_pred$Home_Spread[amatch(NFL_table_clean$Team[row] ,word( model_pred$Away_Team,-1), maxDist = 2)]
-    midpoint = model_pred$Midpoint[amatch(NFL_table_clean$Team[row] ,word( model_pred$Away_Team,-1), maxDist = 2)]
+    away_spread = model_pred$Away_Score[amatch(NFL_table_clean$Team[row] ,word( model_pred$Away_Team,-1), maxDist = 2)]-model_pred$Home_Score[amatch(NFL_table_clean$Team[row] ,word( model_pred$Away_Team,-1), maxDist = 2)]
+    home_spread = model_pred$Home_Score[amatch(NFL_table_clean$Team[row] ,word( model_pred$Away_Team,-1), maxDist = 2)] - model_pred$Away_Score[amatch(NFL_table_clean$Team[row] ,word( model_pred$Away_Team,-1), maxDist = 2)]
+    #midpoint = model_pred$Midpoint[amatch(NFL_table_clean$Team[row] ,word( model_pred$Away_Team,-1), maxDist = 2)]
 
-    NFL_table_clean$Playoffs[row] = ifelse( away_spread <  home_spread, -abs(midpoint), abs(midpoint) )
+    #NFL_table_clean$Playoffs[row] = ifelse( away_spread <  home_spread, -abs(midpoint), abs(midpoint) )
+    NFL_table_clean$Projection[row] = ifelse(away_spread < 0, paste("+",as.character(round(away_spread,1)),sep=""),  paste("-",as.character(round(away_spread,1)),sep=""))
   }
 
 }
 
 
 
-
-NFL_table_clean <- NFL_table_clean %>% rename_at('Playoffs', ~'Model')
 ```
+
 
 ```{r table, echo = FALSE}
 ### Horizontal bar chart to display points scored and points against

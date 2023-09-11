@@ -13,7 +13,10 @@ import scipy
 import statistics as stats
 import numpy as np
 from sklearn.linear_model import LinearRegression
-
+import seaborn as sns
+import matplotlib.pyplot as plt
+import xgboost as xgb
+from sklearn.model_selection import train_test_split
 # Calculate ELO rating for NFL teams using data scraped from web
 # Starting out with calculating # of wins
 
@@ -300,41 +303,6 @@ team_ref_2022['season']=2022
 # team_ref_2023['season']=2023
 
 
-elo_list = [
-      [    1320], #Arizona Cardinals
-      [    1480], #Atlanta Falcons
-      [    1600], #Baltimore Ravens
-      [    1675], #Buffalo Bills
-      [    1400], #Carolina Panthers
-      [    1375], #Chicago Bears
-      [    1730], #Cincinatti Bengals
-      [    1575], #Cleveland Browns
-      [    1575], #Dallas Cowboys
-      [    1475], #Denver Broncos
-      [    1575], #Detroit Lions
-      [    1450], #Green Bay 
-      [    1391], #Houston Texans
-      [    1319], #Indianapolis Colts
-      [    1550], #Jax Jaguars
-      [    1705], #KC Chiefs
-      [    1400], #LV Raiders
-      [    1580], #LA Chargers
-      [    1410], #LA Rams
-      [    1525], #Miami Dolphins
-      [    1550], #Minn Vikings
-      [    1500], #NE Patriots
-      [    1504], #NO Saints
-      [    1475], #NY Giants
-      [    1545], #NY Jets
-      [    1730], #Philly Eagles
-      [    1450], #Pitt Steelers
-      [    1575], #49ers
-      [    1550], #Seahawks
-      [    1440], #TB Buccaneers 
-      [    1450], #Tenn Titans 
-      [    1465]] #WSH Commanders
-
-
 
 
 
@@ -573,27 +541,51 @@ for game in range(1,len(s['games'])):
 
 
     ################## home #####################
-
+    #feature = ['epa', 'epa_allowed', 'passing_yards', 'rushing_yards', 'turnovers', 'takeaways','home_away', 'elo','weights']
     predictors = ['epa', 'epa_allowed', 'passing_yards', 'rushing_yards', 'turnovers', 'takeaways','home_away', 'elo']
     y = ht_df['points_scored']
     weights = np.ones(len(ht_df))
     for i in range(len(weights)-1):
-        weights[i+1] = weights[i] + .5 
-        
+        weights[i+1] = weights[i] + .25
+    
+    # ht_df['weights'] = weights        
 
+
+
+    # X, y = ht_df[predictors],  ht_df[['points_scored','weights']]
+
+
+
+    # params = {"objective": "reg:absoluteerror", "tree_method": "gpu_hist"}
+    # # Create regression matrices
+    # dtrain_reg = xgb.DMatrix(X[predictors], y['points_scored'],weight =y['weights'] )
+    # #dtest_reg =xgb.DMatrix(X_test[predictors], y_test['points_scored'],weight =y_test['weights'] )
+    
+    # n = 50
+    # model_home = xgb.train(
+    # params=params,
+    # dtrain=dtrain_reg,
+    # num_boost_round=n,
+    # verbose_eval=25
+    # )
+  
+    
     model_home = LinearRegression().fit(ht_df[predictors],y,sample_weight=weights)
 
 
-    exp_epa = (stats.median(ht_df.epa) + stats.median(at_df.epa_allowed))/2
-    exp_epa_allowed = (stats.median(ht_df.epa_allowed) + stats.median(at_df.epa))/2
-    exp_passing_yards = (stats.median(ht_df.passing_yards) + stats.median(at_df.passing_yards_allowed))/2
-    exp_rushing_yards = (stats.median(ht_df.rushing_yards) + stats.median(at_df.rushing_yards_allowed))/2
-    exp_turnovers = (stats.mean(ht_df.turnovers) + stats.mean(at_df.takeaways))/2
-    exp_takeaways = (stats.mean(ht_df.takeaways) + stats.mean(at_df.turnovers))/2
+    exp_epa = (stats.median(ht_df[len(ht_df)-10:len(ht_df)].epa) + stats.median(at_df[len(at_df)-10:len(at_df)].epa_allowed))/2
+    exp_epa_allowed = (stats.median(ht_df[len(ht_df)-10:len(ht_df)].epa_allowed) + stats.median(at_df[len(at_df)-10:len(at_df)].epa))/2
+    exp_passing_yards = (stats.median(ht_df[len(ht_df)-10:len(ht_df)].passing_yards) + stats.median(at_df[len(at_df)-10:len(at_df)].passing_yards_allowed))/2
+    exp_rushing_yards = (stats.median(ht_df[len(ht_df)-10:len(ht_df)].rushing_yards) + stats.median(at_df[len(at_df)-10:len(at_df)].rushing_yards_allowed))/2
+    exp_turnovers = (stats.mean(ht_df[len(ht_df)-10:len(ht_df)].turnovers) + stats.mean(at_df[len(at_df)-10:len(at_df)].takeaways))/2
+    exp_takeaways = (stats.mean(ht_df[len(ht_df)-10:len(ht_df)].takeaways) + stats.mean(at_df[len(at_df)-10:len(at_df)].turnovers))/2
 
-    home_score_proj = model_home.predict(np.array([[exp_epa,exp_epa_allowed,exp_passing_yards,exp_rushing_yards,exp_turnovers,exp_takeaways,1, team_ref_2022.loc[home_team_input,'Current ELO']]]))
-
-
+    home_score_proj = model_home.predict(np.array([[exp_epa,exp_epa_allowed,exp_passing_yards,exp_rushing_yards,exp_turnovers,exp_takeaways,1, team_ref_2022.loc[home_team_input,'Current ELO']]]))[0]
+    #obj  = pd.DataFrame({'epa':exp_epa, 'epa_allowed':exp_epa_allowed, 'passing_yards':exp_passing_yards, 'rushing_yards':exp_rushing_yards, 'turnovers':exp_turnovers, 'takeaways':exp_takeaways,'home_away':[1], 'elo':team_ref_2022.loc[home_team_input,'Current ELO']})
+    
+    #home_score_proj = model_home.predict(xgb.DMatrix(obj))[0]
+    
+    
 
 
 
@@ -609,20 +601,33 @@ for game in range(1,len(s['games'])):
     for i in range(len(weights)-1):
         weights[i+1] = weights[i] + .5
     model_away = LinearRegression().fit(at_df[predictors],y, sample_weight=weights)
+    #at_df['weights'] = weights         
+    #model_home = LinearRegression().fit(ht_df[predictors],y,sample_weight=weights)
 
 
+    exp_epa = (stats.median(at_df[len(at_df)-10:len(at_df)].epa) + stats.median(ht_df[len(ht_df)-10:len(ht_df)].epa_allowed))/2
+    exp_epa_allowed = (stats.median(at_df[len(at_df)-10:len(at_df)].epa_allowed) + stats.median(ht_df[len(ht_df)-10:len(ht_df)].epa))/2
+    exp_passing_yards = (stats.median(at_df[len(at_df)-10:len(at_df)].passing_yards) + stats.median(ht_df[len(ht_df)-10:len(ht_df)].passing_yards_allowed))/2
+    exp_rushing_yards = (stats.median(at_df[len(at_df)-10:len(at_df)].rushing_yards) + stats.median(ht_df[len(ht_df)-10:len(ht_df)].rushing_yards_allowed))/2
+    exp_turnovers = (stats.mean(at_df[len(at_df)-10:len(at_df)].turnovers) + stats.mean(ht_df[len(ht_df)-10:len(ht_df)].takeaways))/2
+    exp_takeaways = (stats.mean(at_df[len(at_df)-10:len(at_df)].takeaways) + stats.mean(ht_df[len(ht_df)-10:len(ht_df)].turnovers))/2
 
 
-    exp_epa = (stats.median(at_df.epa) + stats.median(ht_df.epa_allowed))/2
-    exp_epa_allowed = (stats.median(at_df.epa_allowed) + stats.median(ht_df.epa))/2
-    exp_passing_yards = (stats.median(at_df.passing_yards) + stats.median(ht_df.passing_yards_allowed))/2
-    exp_rushing_yards = (stats.median(at_df.rushing_yards) + stats.median(ht_df.rushing_yards_allowed))/2
-    exp_turnovers = (stats.mean(at_df.turnovers) + stats.mean(ht_df.takeaways))/2
-    exp_takeaways = (stats.mean(at_df.takeaways) + stats.mean(ht_df.turnovers))/2
+    away_score_proj = model_away.predict(np.array([[exp_epa,exp_epa_allowed,exp_passing_yards,exp_rushing_yards,exp_turnovers,exp_takeaways,0, team_ref_2022.loc[away_team_input,'Current ELO']]]))[0]
+
+    #obj  = pd.DataFrame({'epa':exp_epa, 'epa_allowed':exp_epa_allowed, 'passing_yards':exp_passing_yards, 'rushing_yards':exp_rushing_yards, 'turnovers':exp_turnovers, 'takeaways':exp_takeaways,'home_away':[0], 'elo':team_ref_2022.loc[away_team_input,'Current ELO']})
+    
+    #away_score_proj = model_away.predict(xgb.DMatrix(obj))[0]
+
+    
+    # exp_epa = (stats.median(at_df[len(at_df)-10:len(at_df)].epa) + stats.median(ht_df[len(ht_df)-10:len(ht_df)].epa_allowed))/2
+    # exp_epa_allowed = (stats.median(at_df[len(at_df)-10:len(at_df)].epa_allowed) + stats.median(ht_df[len(ht_df)-10:len(ht_df)].epa))/2
+    # exp_passing_yards = (stats.median(at_df[len(at_df)-10:len(at_df)].passing_yards) + stats.median(ht_df[len(ht_df)-10:len(ht_df)].passing_yards_allowed))/2
+    # exp_rushing_yards = (stats.median(at_df[len(at_df)-10:len(at_df)].rushing_yards) + stats.median(ht_df[len(ht_df)-10:len(ht_df)].rushing_yards_allowed))/2
+    # exp_turnovers = (stats.mean(at_df[len(at_df)-10:len(at_df)].turnovers) + stats.mean(ht_df[len(ht_df)-10:len(ht_df)].takeaways))/2
+    # exp_takeaways = (stats.mean(at_df[len(at_df)-10:len(at_df)].takeaways) + stats.mean(ht_df[len(ht_df)-10:len(ht_df)].turnovers))/2
 
 
-
-    away_score_proj = model_away.predict(np.array([[exp_epa,exp_epa_allowed,exp_passing_yards,exp_rushing_yards,exp_turnovers,exp_takeaways,0, team_ref_2022.loc[away_team_input,'Current ELO']]]))
 
 
 
@@ -630,13 +635,13 @@ for game in range(1,len(s['games'])):
     df.loc[s['games'][game]['id'],'Away_Team'] = f"{s['games'][game]['awayTeam']['fullName']}"
     df.loc[s['games'][game]['id'],'Home_Score'] = home_score_proj
     df.loc[s['games'][game]['id'],'Away_Score'] = away_score_proj
-    df.loc[s['games'][game]['id'],'Spread'] = home_score_proj - away_score_proj
+    df.loc[s['games'][game]['id'],'Spread'] = home_score_proj- away_score_proj
     df.loc[s['games'][game]['id'],'Total'] = home_score_proj + away_score_proj
 
 
 
-    print(f"{home_team_input}: {home_score_proj}")
-    print(f"{away_team_input}: {away_score_proj}")
+    print(f"{home_team_input}: {np.mean(home_score_proj)}")
+    print(f"{away_team_input}: {np.mean(away_score_proj)}")
 
 
 
@@ -644,7 +649,7 @@ for game in range(1,len(s['games'])):
 
 
 
-df
+df.to_csv('model_pred.csv')
 
 
 
