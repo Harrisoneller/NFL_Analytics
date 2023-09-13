@@ -1,5 +1,5 @@
 ---
-title: 'NFL Big Board'
+title: 'NFL Big Board: Week 2'
 author: "Harrison Eller"
 date: "09-2023"
 output: html_document
@@ -18,7 +18,7 @@ library(stringdist)
 ```
 
 ```{r data, echo = FALSE}
-url <- "https://www.pro-football-reference.com/years/2022/"
+url <- "https://www.pro-football-reference.com/years/2023/"
 
 
 ### Get AFC conference table from pro-football-reference site
@@ -52,7 +52,8 @@ NFL_table_clean <- NFL_table %>%
   mutate(Tm = gsub("[*+]", "", Tm)) %>%
   rename(Record = `W-L%`) %>%
   ### Convert W, L, T into one column named "Record"
-  unite(Record, W, L, T, sep = "-") %>%
+  #unite(Record, W, L, T, sep = "-") %>%
+  unite(Record, W, L,  sep = "-") %>%
   ### Extract team name
   mutate(Team = word(Tm, -1)) %>% 
   mutate(
@@ -133,7 +134,7 @@ for (row in 1:nrow(NFL_table_clean)){
     #midpoint = model_pred$Midpoint[amatch(NFL_table_clean$Team[row] ,word( model_pred$Home_Team,-1), maxDist = 2)]
 
     #NFL_table_clean$Playoffs[row] = ifelse( home_spread <  away_spread, -abs(midpoint), abs(midpoint) )
-    NFL_table_clean$Projection[row] = ifelse(home_spread < 0, paste("+",as.character(round(home_spread,1)),sep=""), paste("-",as.character(round(home_spread,1)),sep=""))
+    NFL_table_clean$Projection[row] = ifelse(home_spread < 0, paste("+",substr(as.character(round(away_spread,1)),1,5),sep=""), paste("-",as.character(round(home_spread,1)),sep=""))
   }else{
     ht = model_pred$Home_Team[amatch(NFL_table_clean$Team[row] ,word( model_pred$Away_Team,-1), maxDist = 2)]
     at = model_pred$Away_Team[amatch(NFL_table_clean$Team[row] ,word( model_pred$Away_Team,-1), maxDist = 2)]
@@ -142,7 +143,7 @@ for (row in 1:nrow(NFL_table_clean)){
     #midpoint = model_pred$Midpoint[amatch(NFL_table_clean$Team[row] ,word( model_pred$Away_Team,-1), maxDist = 2)]
 
     #NFL_table_clean$Playoffs[row] = ifelse( away_spread <  home_spread, -abs(midpoint), abs(midpoint) )
-    NFL_table_clean$Projection[row] = ifelse(away_spread < 0, paste("+",as.character(round(away_spread,1)),sep=""),  paste("-",as.character(round(away_spread,1)),sep=""))
+    NFL_table_clean$Projection[row] = ifelse(away_spread < 0, paste("+",substr(as.character(round(away_spread,1)),2,5),sep=""),  paste("-",as.character(round(away_spread,1)),sep=""))
   }
 
 }
@@ -150,6 +151,28 @@ for (row in 1:nrow(NFL_table_clean)){
 
 
 ```
+
+
+```{r}
+ratings = read.csv("C:\\Users\\Harrison Eller\\sports-app-server\\power_rankings.csv")
+
+
+for (row in 1:nrow(NFL_table_clean)){
+
+    #ht = ratings$Home_Team[amatch(NFL_table_clean$Team[row] ,word( ratings$team_name,-1), maxDist = 2)]
+    #at = ratings$Away_Team[amatch(NFL_table_clean$Team[row] ,word( ratings$team_name,-1), maxDist = 2)]
+    home_EPA =ratings$AVG_EPA[amatch(NFL_table_clean$Team[row] ,word( ratings$team_name,-1), maxDist = 2)] 
+    home_EPA_Allowed = ratings$AVG_EPA_Allowed[amatch(NFL_table_clean$Team[row] ,word( ratings$team_name,-1), maxDist = 2)] 
+    
+    NFL_table_clean$OSRS[row] = home_EPA
+    NFL_table_clean$DSRS[row] = home_EPA_Allowed
+    NFL_table_clean$SRS[row] = home_EPA_Allowed + home_EPA 
+    
+}
+
+NFL_table_clean$SRS = round(rank(NFL_table_clean$SRS ))
+```
+
 
 
 ```{r table, echo = FALSE}
