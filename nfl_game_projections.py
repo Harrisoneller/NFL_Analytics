@@ -298,16 +298,16 @@ def get_current_elo(input_season):
 out_elo, team_ref_2022= get_current_elo(input_season=2022)
 team_ref_2022['season']=None
 team_ref_2022['season']=2022
-# out_elo, team_ref_2023= get_current_elo(input_season=2023)
-# team_ref_2023['season']=None
-# team_ref_2023['season']=2023
+out_elo, team_ref_2023= get_current_elo(input_season=2023)
+team_ref_2023['season']=None
+team_ref_2023['season']=2023
 
 
 
 
 
 
-s = nfl.nfl_games.nfl_game_schedule(season = 2023,week=1)
+s = nfl.nfl_games.nfl_game_schedule(season = 2023,week=2)
 s['games']
 gid = [] 
 for game in range(len(s['games'])):
@@ -325,7 +325,7 @@ data=pbp
 
 
 
-for game in range(1,len(s['games'])):
+for game in range(len(s['games'])):
     
     home_team_input = f"{s['games'][game]['homeTeam']['fullName']}"
     away_team_input = f"{s['games'][game]['awayTeam']['fullName']}"
@@ -408,7 +408,7 @@ for game in range(1,len(s['games'])):
             ht_df['season'].iloc[i] = 2023
 
     elo_temp_home_2022 = pd.Series(list(team_ref_2022.loc[home_team_input,'elo']))
-    #elo_temp_home_2023 = pd.Series(list(team_ref_2023.loc[home_team_input,'elo']))
+    elo_temp_home_2023 = pd.Series(list(team_ref_2023.loc[home_team_input,'elo']))
 
     ht_df['elo']=None
 
@@ -421,9 +421,9 @@ for game in range(1,len(s['games'])):
             counter+=1
 
 
-    # for i in range(len(ht_df[ht_df['season'] == 2023])):
-    #     try:ht_df.loc[ ht_df[ht_df.season == 2023].index[i],'elo'] = elo_temp_home_2023[i]
-    #     except: ht_df.loc[ ht_df[ht_df.season == 2023].index[i],'elo'] = team_ref_2023.loc[home_team_input,'Current ELO']
+    for i in range(len(ht_df[ht_df['season'] == 2023])):
+        try:ht_df.loc[ ht_df[ht_df.season == 2023].index[i],'elo'] = elo_temp_home_2023[i]
+        except: ht_df.loc[ ht_df[ht_df.season == 2023].index[i],'elo'] = team_ref_2023.loc[home_team_input,'Current ELO']
 
 
 
@@ -511,9 +511,9 @@ for game in range(1,len(s['games'])):
 
 
 
-    # for i in range(len(at_df[at_df['season'] == 2023])):
-    #     try:at_df.loc[ at_df[at_df.season == 2023].index[i],'elo'] = elo_temp_away_2023[i]
-    #     except: at_df.loc[ at_df[at_df.season == 2023].index[i],'elo'] = team_ref_2023.loc[away_team_input,'Current ELO']
+    for i in range(len(at_df[at_df['season'] == 2023])):
+        try:at_df.loc[ at_df[at_df.season == 2023].index[i],'elo'] = elo_temp_away_2023[i]
+        except: at_df.loc[ at_df[at_df.season == 2023].index[i],'elo'] = team_ref_2023.loc[away_team_input,'Current ELO']
 
 
 
