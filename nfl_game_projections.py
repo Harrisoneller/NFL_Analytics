@@ -648,12 +648,34 @@ for game in range(len(s['games'])):
 
 
 
-
+df.Spread.iloc[14] = -df.Spread.iloc[14]
 df.to_csv('model_pred.csv')
 
 
 
 
+df
+
+
+df.to_csv('model_pred.csv')
+
+df.Spread.iloc[13] = -df.Spread.iloc[13]
+
+
+home_team = 'PIT'
+away_team = 'CLE'
+
+
+################################# betting info ###############################################
+
+ats = pd.DataFrame({'home_team_ats_wins':[0], 'home_team_ats_losses':[1], 'away_team_ats_wins':[1], 'away_team_ats_losses':[0], 'home_team':[f'{home_team}'],'away_team':[f'{away_team}']})
+
+ats.to_csv(r'C:\Users\harri\OneDrive\Desktop\LTB\NFL Prediction Models\ats.csv')
+
+
+bet_info = pd.DataFrame({'Money_percent':[55,45], 'Tickets_percent':[45,55], 'Teams':[home_team,away_team]})
+bet_info.index=bet_info.Teams
+bet_info.to_csv(r'C:\Users\harri\OneDrive\Desktop\LTB\NFL Prediction Models\bet_info.csv')
 
 
 
