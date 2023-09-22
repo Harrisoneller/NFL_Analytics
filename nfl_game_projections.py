@@ -307,7 +307,7 @@ team_ref_2023['season']=2023
 
 
 
-s = nfl.nfl_games.nfl_game_schedule(season = 2023,week=2)
+s = nfl.nfl_games.nfl_game_schedule(season = 2023,week=3)
 s['games']
 gid = [] 
 for game in range(len(s['games'])):

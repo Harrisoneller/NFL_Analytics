@@ -1,5 +1,5 @@
 ---
-title: 'NFL Big Board: Week 2'
+title: 'NFL Big Board: Week 3'
 author: "Harrison Eller"
 date: "09-2023"
 output: html_document
@@ -154,23 +154,23 @@ for (row in 1:nrow(NFL_table_clean)){
 
 
 ```{r}
-ratings = read.csv("C:\\Users\\Harrison Eller\\sports-app-server\\power_rankings.csv")
-
-
-for (row in 1:nrow(NFL_table_clean)){
-
-    #ht = ratings$Home_Team[amatch(NFL_table_clean$Team[row] ,word( ratings$team_name,-1), maxDist = 2)]
-    #at = ratings$Away_Team[amatch(NFL_table_clean$Team[row] ,word( ratings$team_name,-1), maxDist = 2)]
-    home_EPA =ratings$AVG_EPA[amatch(NFL_table_clean$Team[row] ,word( ratings$team_name,-1), maxDist = 2)] 
-    home_EPA_Allowed = ratings$AVG_EPA_Allowed[amatch(NFL_table_clean$Team[row] ,word( ratings$team_name,-1), maxDist = 2)] 
-    
-    NFL_table_clean$OSRS[row] = home_EPA
-    NFL_table_clean$DSRS[row] = home_EPA_Allowed
-    NFL_table_clean$SRS[row] = home_EPA_Allowed + home_EPA 
-    
-}
-
-NFL_table_clean$SRS = round(rank(NFL_table_clean$SRS ))
+# ratings = read.csv("C:\\Users\\Harrison Eller\\sports-app-server\\power_rankings.csv")
+# 
+# 
+# for (row in 1:nrow(NFL_table_clean)){
+# 
+#     #ht = ratings$Home_Team[amatch(NFL_table_clean$Team[row] ,word( ratings$team_name,-1), maxDist = 2)]
+#     #at = ratings$Away_Team[amatch(NFL_table_clean$Team[row] ,word( ratings$team_name,-1), maxDist = 2)]
+#     home_EPA =ratings$AVG_EPA[amatch(NFL_table_clean$Team[row] ,word( ratings$team_name,-1), maxDist = 2)] 
+#     home_EPA_Allowed = ratings$AVG_EPA_Allowed[amatch(NFL_table_clean$Team[row] ,word( ratings$team_name,-1), maxDist = 2)] 
+#     
+#     NFL_table_clean$OSRS[row] = home_EPA
+#     NFL_table_clean$DSRS[row] = home_EPA_Allowed
+#     NFL_table_clean$SRS[row] = home_EPA_Allowed + home_EPA 
+#     
+# }
+# 
+# NFL_table_clean$SRS = round(rank(NFL_table_clean$SRS ))
 ```
 
 
