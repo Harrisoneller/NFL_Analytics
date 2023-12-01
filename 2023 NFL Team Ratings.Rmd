@@ -1,7 +1,7 @@
 ---
-title: 'NFL Big Board: Week 3'
+title: 'NFL Big Board: Week 12'
 author: "Harrison Eller"
-date: "09-2023"
+date: "11-2023"
 output: html_document
 ---
 
@@ -442,7 +442,7 @@ table <-
 ### Add title and subtitle to top of page above table
 div(class = "team-ratings",
     div(class = "title",
-        h2("2023 NFL Team Rating & Stats"),
+        h2("2023 NFL Team Ratings & Projections (Week 12)"),
         "Ratings and predictions for the 2023 NFL season"),
   table,
   ### Add legend and source below the table

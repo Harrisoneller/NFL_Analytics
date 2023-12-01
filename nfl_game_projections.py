@@ -304,10 +304,10 @@ team_ref_2023['season']=2023
 
 
 
+######################################################################################################################################################################################
 
 
-
-s = nfl.nfl_games.nfl_game_schedule(season = 2023,week=3)
+s = nfl.nfl_games.nfl_game_schedule(season = 2023,week=12)
 s['games']
 gid = [] 
 for game in range(len(s['games'])):
@@ -648,18 +648,27 @@ for game in range(len(s['games'])):
 
 
 
-df.Spread.iloc[14] = -df.Spread.iloc[14]
-df.to_csv('model_pred.csv')
-
-
-
 
 df
 
 
+
+
+
+
+
+
+
+
+
+df['Home_Score'].iloc[3]= df['Home_Score'].iloc[3] -4
+df['Away_Score'].iloc[13]= df['Away_Score'].iloc[13] + 4
+
+df
+
 df.to_csv('model_pred.csv')
 
-df.Spread.iloc[13] = -df.Spread.iloc[13]
+
 
 
 home_team = 'PIT'
