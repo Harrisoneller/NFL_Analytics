@@ -13,7 +13,6 @@ import scipy
 import statistics as stats
 import numpy as np
 from sklearn.linear_model import LinearRegression
-import seaborn as sns
 import matplotlib.pyplot as plt
 import xgboost as xgb
 from sklearn.model_selection import train_test_split
@@ -307,7 +306,7 @@ team_ref_2023['season']=2023
 
 
 
-s = nfl.nfl_games.nfl_game_schedule(season = 2023,week=2)
+s = nfl.nfl_games.nfl_game_schedule(season = 2023,week=17)
 s['games']
 gid = [] 
 for game in range(len(s['games'])):
@@ -648,32 +647,32 @@ for game in range(len(s['games'])):
 
 
 
-df.Spread.iloc[14] = -df.Spread.iloc[14]
-df.to_csv('model_pred.csv')
-
-
-
-
-df
-
-
-df.to_csv('model_pred.csv')
-
 df.Spread.iloc[13] = -df.Spread.iloc[13]
+df.to_csv('model_pred.csv')
 
 
-home_team = 'PIT'
-away_team = 'CLE'
+
+
+# df
+
+
+# df.to_csv('model_pred.csv')
+
+# df.Spread.iloc[13] = -df.Spread.iloc[13]
+
+
+home_team = 'BUF'
+away_team = 'NYG'
 
 
 ################################# betting info ###############################################
 
-ats = pd.DataFrame({'home_team_ats_wins':[0], 'home_team_ats_losses':[1], 'away_team_ats_wins':[1], 'away_team_ats_losses':[0], 'home_team':[f'{home_team}'],'away_team':[f'{away_team}']})
+ats = pd.DataFrame({'home_team_ats_wins':[3], 'home_team_ats_losses':[2], 'away_team_ats_wins':[0], 'away_team_ats_losses':[5], 'home_team':[f'{home_team}'],'away_team':[f'{away_team}']})
 
 ats.to_csv(r'C:\Users\harri\OneDrive\Desktop\LTB\NFL Prediction Models\ats.csv')
 
 
-bet_info = pd.DataFrame({'Money_percent':[55,45], 'Tickets_percent':[45,55], 'Teams':[home_team,away_team]})
+bet_info = pd.DataFrame({'Money_percent':[35,65], 'Tickets_percent':[67,33], 'Teams':[home_team,away_team]})
 bet_info.index=bet_info.Teams
 bet_info.to_csv(r'C:\Users\harri\OneDrive\Desktop\LTB\NFL Prediction Models\bet_info.csv')
 
@@ -681,3 +680,6 @@ bet_info.to_csv(r'C:\Users\harri\OneDrive\Desktop\LTB\NFL Prediction Models\bet_
 
 
 
+df = pd.read_csv('model_pred.csv')
+
+df
