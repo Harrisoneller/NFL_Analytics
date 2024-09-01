@@ -6,9 +6,9 @@ import scipy
 import difflib
 import json
 import datetime
-ID = nfl.load_nfl_players()
-stats = nfl.load_nfl_player_stats()
-ngs = nfl.load_nfl_ngs_receiving()  
+ID = nfl.load_nfl_players(return_as_pandas=True)
+stats = nfl.load_nfl_player_stats(return_as_pandas=True)
+ngs = nfl.load_nfl_ngs_receiving(return_as_pandas=True)  
     
 
 class Statlete:
@@ -20,9 +20,9 @@ class Statlete:
     import json
     
     """ Need to adjust season year to 2023 once season starts"""
-    ID = nfl.load_nfl_players()
-    stats = nfl.load_nfl_player_stats()
-    ngs = nfl.load_nfl_ngs_receiving()  
+    ID = nfl.load_nfl_players(return_as_pandas=True)
+    stats = nfl.load_nfl_player_stats(return_as_pandas=True)
+    ngs = nfl.load_nfl_ngs_receiving(return_as_pandas=True)  
     
     #### init ####
     def __init__(self, player):
@@ -37,9 +37,9 @@ class Statlete:
         
         
     class Game:
-        ID = nfl.load_nfl_players()
-        stats = nfl.load_nfl_player_stats()
-        ngs = nfl.load_nfl_ngs_receiving() 
+        ID = nfl.load_nfl_players(return_as_pandas=True)
+        stats = nfl.load_nfl_player_stats(return_as_pandas=True)
+        ngs = nfl.load_nfl_ngs_receiving(return_as_pandas=True) 
         
         def __init__(self,player):
             #player = difflib.get_close_matches(player, ID.display_name.unique(), n=1, cutoff=0.6)
@@ -49,7 +49,7 @@ class Statlete:
                     
         ############################ get data on a game to game basis ########################
         def get_data(self, week, season = 2022):
-            stats = nfl.load_nfl_player_stats()  
+            stats = nfl.load_nfl_player_stats(return_as_pandas=True)  
             player_df = stats[stats.player_display_name.isin(self.player_game)]
             output1 = player_df[player_df['week'] == week]
             try:
@@ -61,9 +61,9 @@ class Statlete:
         
         
     class Season:       
-        ID = nfl.load_nfl_players()
-        stats = nfl.load_nfl_player_stats()
-        ngs = nfl.load_nfl_ngs_receiving() 
+        ID = nfl.load_nfl_players(return_as_pandas=True)
+        stats = nfl.load_nfl_player_stats(return_as_pandas=True)
+        ngs = nfl.load_nfl_ngs_receiving(return_as_pandas=True) 
         
         def __init__(self, player):
             #player_ngs = difflib.get_close_matches(player, ngs.player_display_name.unique(), n=1, cutoff=0.6)
@@ -82,9 +82,9 @@ class Statlete:
             return df.to_json(orient = 'columns' )
 
     class Career:       
-        ID = nfl.load_nfl_players()
-        stats = nfl.load_nfl_player_stats()
-        ngs = nfl.load_nfl_ngs_receiving() 
+        ID = nfl.load_nfl_players(return_as_pandas=True)
+        stats = nfl.load_nfl_player_stats(return_as_pandas=True)
+        ngs = nfl.load_nfl_ngs_receiving(return_as_pandas=True) 
         
         def __init__(self,player):
             #player = difflib.get_close_matches(player, ID.display_name.unique(), n=1, cutoff=0.6)
@@ -93,7 +93,7 @@ class Statlete:
             #self.player_ngs = player_ngs 
 
         def get_data(self, season = stats.season.unique()):
-            stats = nfl.load_nfl_player_stats()  
+            stats = nfl.load_nfl_player_stats(return_as_pandas=True)  
             player_df = stats[stats.player_display_name.isin(self.player_career)]
             #output1 = player_df[player_df['week'] == week]
             try:
@@ -104,9 +104,9 @@ class Statlete:
         
         
     class NextGenStats:
-        ID = nfl.load_nfl_players()
-        stats = nfl.load_nfl_player_stats()
-        ngs = nfl.load_nfl_ngs_receiving() 
+        ID = nfl.load_nfl_players(return_as_pandas=True)
+        stats = nfl.load_nfl_player_stats(return_as_pandas=True)
+        ngs = nfl.load_nfl_ngs_receiving(return_as_pandas=True) 
         
         def __init__(self,player):
             #player = difflib.get_close_matches(player, ID.display_name.unique(), n=1, cutoff=0.6)
@@ -114,7 +114,7 @@ class Statlete:
             #self.player = player_ngs
             
         def get_data(self, season = [2022], week = False):
-            ngs = nfl.load_nfl_ngs_receiving() 
+            ngs = nfl.load_nfl_ngs_receiving(return_as_pandas=True) 
             player_df = ngs[ngs.player_display_name.isin(self.player_ngs)]
             
             if len(season) > 1:
@@ -127,16 +127,16 @@ class Statlete:
             return df.to_json(orient = 'columns' )
         
     class PlayerInfo:
-        ID = nfl.load_nfl_players()
-        stats = nfl.load_nfl_player_stats()
-        ngs = nfl.load_nfl_ngs_receiving() 
+        ID = nfl.load_nfl_players(return_as_pandas=True)
+        stats = nfl.load_nfl_player_stats(return_as_pandas=True)
+        ngs = nfl.load_nfl_ngs_receiving(return_as_pandas=True) 
 
         def __init__(self,player):
             self.player =player
             #self.player_ngs = player_ngs
             
         def get_info(self, season = 2022.0): ############ season input format is different here
-            ID = nfl.load_nfl_players()
+            ID = nfl.load_nfl_players(return_as_pandas=True)
             df = ID[ID['display_name'].isin(self.player)]
             ### filter for current season ###    
             #df =  player_df[player_df['season'] == season]
@@ -171,7 +171,7 @@ class Team:
     #teams_info = nfl.nfl_loaders.load_nfl_teams()
 
     def __init__(self, team):
-        teams_info = nfl.nfl_loaders.load_nfl_teams()
+        teams_info = nfl.nfl_loaders.load_nfl_teams(return_as_pandas=True)
         team = difflib.get_close_matches(team, teams_info.team_name.unique(), n=1, cutoff=0.6)
         self.team = team
         self.team_abr = list(teams_info.team_abbr[teams_info.team_name.isin(self.team)])[0]
@@ -181,12 +181,12 @@ class Team:
         
         
     class Season:       
-        ID = nfl.load_nfl_players()
-        stats = nfl.load_nfl_player_stats()
-        ngs = nfl.load_nfl_ngs_receiving() 
+        ID = nfl.load_nfl_players(return_as_pandas=True)
+        stats = nfl.load_nfl_player_stats(return_as_pandas=True)
+        ngs = nfl.load_nfl_ngs_receiving(return_as_pandas=True) 
         
         def __init__(self, team):
-            teams_info = nfl.nfl_loaders.load_nfl_teams()
+            teams_info = nfl.nfl_loaders.load_nfl_teams(return_as_pandas=True)
             team = difflib.get_close_matches(team, teams_info.team_name.unique(), n=1, cutoff=0.6)
             self.team_season = team
             self.team_abr_season = teams_info.team_abbr[teams_info.team_name.isin(team)]

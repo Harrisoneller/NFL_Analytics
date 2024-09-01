@@ -1,0 +1,708 @@
+---
+title: 'NFL Big Board: Week 12'
+author: "Harrison Eller"
+date: "11-2023"
+output: html_document
+---
+
+```{r setup, warnings = FALSE, message = FALSE, include = FALSE}
+knitr::opts_chunk$set(warnings = FALSE, message = FALSE, echo = FALSE)
+library(rvest)
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(htmltools)
+library(htmlwidgets)
+library(reactable)
+library(stringdist)
+library(nflfastR)
+library(nflreadr)
+library(nflverse)
+setwd("/Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics")
+```
+
+```{r,echo=FALSE,include = FALSE}
+source("NFL_Comprehensive_Linear.R")
+schedule<-load_schedules(2024)
+  schedule <- schedule[which(schedule$week == 1),]
+
+proj <- PROJECTIONS(week=1,season=2024,df, mix_vegas = TRUE)
+
+info <- nflfastR::teams_colors_logos
+nfc <- info %>%
+  filter(team_conf == "NFC")
+afc <- info %>%
+  filter(team_conf == "AFC")
+### creating function to add SD, mean, and mean + sd
+meansd <- function(x, ...) {
+  mean <- mean(x)
+  sd <- sd(x)
+  c(mean - sd, mean, mean + sd)
+}
+
+pbp <- load_pbp(2023)
+pbp<- clean_pbp(pbp)
+pbp <- add_qb_epa(pbp)
+factor(pbp$posteam)
+schedule <- load_schedules(seasons = 2024)
+schedule <- schedule[which(schedule$week == 1),]
+team_info<-teams_colors_logos
+
+df_off <- pbp %>%
+  filter(season_type == "REG", down %in% c(1, 2, 3, 4), punt_attempt == 0) %>%
+  group_by(posteam, game_id )%>%
+  summarise(
+    OFF_EPA = mean(epa, na.rm = TRUE),
+    QB_EPA = mean(qb_epa,na.rm = TRUE),
+    QB = max(passer_player_name,na.rm = TRUE),
+    fumble = sum(fumble_lost),
+    interception = sum(interception),
+    pass_ypa = sum(passing_yards,na.rm = TRUE)/sum(pass_attempt,na.rm = TRUE),
+    rush_ypa = sum(rushing_yards,na.rm = TRUE)/sum(rush_attempt,na.rm = TRUE),
+    pass_yds = sum(passing_yards,na.rm = TRUE),
+    rush_yds = sum(rushing_yards,na.rm = TRUE),
+    ypp = sum(sum(rushing_yards,na.rm = TRUE) + sum(passing_yards,na.rm = TRUE))/n(),
+    drives = max(drive,na.rm = TRUE)/2,
+    #    home_points = max(home_score,na.rm = TRUE),
+    #    away_points = max(away_score,na.rm = TRUE),
+    home_team = max(home_team,na.rm = TRUE),
+    pressures_allowed = (sum(sack,na.rm = TRUE)+sum(qb_hit,na.rm = TRUE) ), 
+    total_plays_off = n(),
+    points = if_else(max(posteam,na.rm = TRUE) == max(home_team,na.rm = TRUE), max(home_score,na.rm = TRUE),max(away_score,na.rm = TRUE))
+    
+  )
+
+
+df_def<- pbp %>%
+  filter(season_type == "REG", down %in% c(1, 2, 3, 4), punt_attempt == 0) %>%
+  group_by(defteam, game_id )%>%
+  summarise(
+    OFF_EPA_allowed = mean(epa, na.rm = TRUE),
+    QB_EPA_allowed = mean(qb_epa,na.rm = TRUE),
+    #QB = max(passer_player_name,na.rm = TRUE),
+    fumbles_forced = sum(fumble_lost),
+    interceptions_forced = sum(interception),
+    pass_ypa_allowed = sum(passing_yards,na.rm = TRUE)/sum(pass_attempt,na.rm = TRUE),
+    rush_ypa_allowed = sum(rushing_yards,na.rm = TRUE)/sum(rush_attempt,na.rm = TRUE),
+    pass_yds_allowed = sum(passing_yards,na.rm = TRUE),
+    rush_yds_allowed = sum(rushing_yards,na.rm = TRUE),
+    ypp_allowed = sum(sum(rushing_yards,na.rm = TRUE) + sum(passing_yards,na.rm = TRUE))/n(),
+    drives_allowed = max(drive,na.rm = TRUE)/2,
+    #    home_points = max(home_score,na.rm = TRUE),
+    #    away_points = max(away_score,na.rm = TRUE),
+    away_team = max(away_team,na.rm = TRUE),
+    pressures_forced = (sum(sack,na.rm = TRUE)+sum(qb_hit,na.rm = TRUE) ), 
+    total_plays_def = n(),
+    points_allowed = if_else(max(defteam,na.rm = TRUE) == max(home_team,na.rm = TRUE), max(away_score,na.rm = TRUE),max(home_score,na.rm = TRUE))
+    
+    
+  )
+
+
+
+df<-cbind(df_off,df_def)
+
+off <- df %>% 
+  group_by(posteam) %>% 
+  summarise(
+    EPA = median(OFF_EPA),
+    ypp = median(ypp)
+  )
+
+
+def <- df %>% 
+  group_by(defteam) %>% 
+  summarise(
+    EPA_allowed = median(OFF_EPA_allowed),
+    ypp_allowed = median(ypp_allowed)
+  )
+
+agg <- off %>% 
+  inner_join(def, c('posteam'='defteam'))
+
+agg$EPA <-rank(-agg$EPA)
+agg$EPA_allowed <-rank(agg$EPA_allowed)
+
+
+schedule['Home_EPA']<-0
+schedule['Away_EPA']<-0
+schedule['Home_EPA_Allowed']<-0
+schedule['Away_EPA_Allowed']<-0
+schedule['Home']<-""
+schedule['Away']<-""
+schedule['Home_Proj']<-0
+schedule['Away_Proj']<-0
+schedule['Home_Record']<-""
+schedule['Away_Record']<-""
+
+
+for (j in 1:nrow(schedule)){
+  schedule$Home_EPA[j]<-round(pull(agg[which(agg$posteam == schedule$home_team[j]),'EPA']),2)
+  schedule$Away_EPA[j]<-round(pull(agg[which(agg$posteam == schedule$away_team[j]),'EPA']),2)
+  schedule$Home_EPA_Allowed[j]<-round(pull(agg[which(agg$posteam == schedule$home_team[j]),'EPA_allowed']),2)
+  schedule$Away_EPA_Allowed[j]<-round(pull(agg[which(agg$posteam == schedule$away_team[j]),'EPA_allowed']),2)
+  
+  schedule$Home[j]<-team_info$team_nick[which(team_info$team_abbr == schedule$home_team[j])]
+  schedule$Away[j]<-team_info$team_nick[which(team_info$team_abbr == schedule$away_team[j])]
+  
+  schedule$Home_Proj[j]<- round(proj$home_score[which(proj$home == schedule$home_team[j])],2)
+  schedule$Away_Proj[j]<-round(proj$away_score[which(proj$away == schedule$away_team[j])],2)
+  
+
+}
+  
+```
+
+
+
+```{r data, echo = FALSE,include = FALSE}
+url <- "https://www.pro-football-reference.com/years/2023/"
+
+team_info<-teams_colors_logos
+### Get AFC conference table from pro-football-reference site
+AFC_table <- url %>%
+  xml2::read_html() %>%
+  html_nodes(xpath = '//*[@id="AFC"]') %>%
+  html_table()
+
+AFC_table <- AFC_table[[1]]
+
+### Get NFC conference table from pro-football-reference site
+NFC_table <- url %>%
+  xml2::read_html() %>%
+  html_nodes(xpath = '//*[@id="NFC"]') %>%
+  html_table()
+
+NFC_table <- NFC_table[[1]]
+
+### Combine AFC and NFC tables together
+NFL_table <- rbind(AFC_table, NFC_table)
+
+NFL_table_clean <- NFL_table %>%
+  ### Create NFL divisions column
+  mutate(Division = ifelse(str_detect(Tm, "FC"), Tm, NA)) %>%
+  fill(Division, .direction = "down") %>%
+  ### Remove team division names from Tm column
+  filter(str_detect(Tm, "FC", negate = TRUE)) %>%
+  ### Add column to say if team made playoffs based off of pre-existing asterisks
+  mutate(Projection = ifelse(str_detect(Tm, "[*+]"), "Yes", "No")) %>%
+  ### Remove asterisks and plus signs next to team names
+  mutate(Tm = gsub("[*+]", "", Tm)) %>%
+  rename(Record = `W-L%`) %>%
+  ### Convert W, L, T into one column named "Record"
+  #unite(Record, W, L, T, sep = "-") %>%
+  unite(Record, W, L,  sep = "-") %>%
+  ### Extract team name
+  mutate(Team = word(Tm, -1)) %>% 
+  mutate(
+    Team = case_when(
+      Team == "Redskins" ~ "Washington",
+      TRUE ~ Team
+    )
+  ) %>%
+  ### Convert columns containing numbers from character to numeric
+  mutate_at(c("SRS", "OSRS", "DSRS", "PF", "PA", "MoV", "SoS"),
+            as.numeric) %>%
+  ### Rank SoS column from 1 to 4 with 1 containing the lowest values and 4 containing the highest
+  mutate(SoS_rating = ntile(SoS, 4)) %>% 
+  select(
+    Division,
+    Team,
+    Record,
+    Projection,
+    SoS_rating,
+    PF,
+    PA,
+    MoV,
+    OSRS,
+    DSRS,
+    SRS,
+  )
+#model_pred$Home_Team[amatch(NFL_table_clean$Team[row] ,word( model_pred$Home_Team,-1), maxDist = 2)]
+NFL_table_clean['team_abbr']<-""
+for (j in 1:nrow(NFL_table_clean)){
+  NFL_table_clean$team_abbr[j]<- team_info$team_abbr[which(team_info$team_nick == NFL_table_clean$Team[j] )]
+}
+
+# home<- NFL_table_clean %>% 
+#   filter(NFL_table_clean$Team %in% pull(team_info[which(team_info$team_abbr %in% schedule$home_team  ),'team_nick'] ) )
+# names(home)[2]<-'Home_Team'
+# 
+# away<- NFL_table_clean %>% 
+#   filter(NFL_table_clean$Team %in% pull(team_info[which(team_info$team_abbr %in% schedule$away_team ),'team_nick'] ) )
+# names(away)[2]<-'Away_Team'
+# 
+# t<-cbind(home,away)
+
+
+
+for(j in 1:nrow(schedule)){
+  home_nick<-team_info$team_nick[which(team_info$team_abbr == schedule$home_team[j])]
+  away_nick<-team_info$team_nick[which(team_info$team_abbr == schedule$away_team[j])]
+  schedule$Home_Record[j]<-NFL_table_clean$Record[which(NFL_table_clean$Team == home_nick)]
+  schedule$Away_Record[j]<-NFL_table_clean$Record[which(NFL_table_clean$Team == away_nick)]
+}
+
+
+NFL_table_clean <- schedule %>% 
+  select(
+    Home_EPA,
+    Home_EPA_Allowed,
+    Home,
+    Home_Proj,
+    Away_Proj,
+    Away,
+    Away_EPA_Allowed,
+    Away_EPA,
+    Home_Record,
+    Away_Record
+    
+  )
+
+
+```
+
+
+
+```{r table, echo = FALSE}
+### Horizontal bar chart to display points scored and points against
+### Horizontal bar chart to display points scored and points against
+### Horizontal bar chart to display points scored and points against
+bar_chart <-
+  function(label,
+           width = "100%",
+           height = "13px",
+           fill = "#00bfc4",
+           background = NULL) {
+    bar <-
+      div(style = list(
+        background = fill,
+        width = width,
+        height = height
+      ))
+    chart <-
+      div(style = list(
+        flexGrow = 1,
+        marginLeft = "8px",
+        background = background
+      ),
+      bar)
+    div(style = list(display = "flex", alignItems = "center"), label, chart)
+  }
+
+### Create orange-blue color palette for Team Rating SRS columns
+make_color_pal <- function(colors, bias = 1) {
+  get_color <- colorRamp(colors, bias = bias)
+  function(x)
+    rgb(get_color(x), maxColorValue = 255)
+}
+
+off_rating_color <-
+  #make_color_pal(c("#67a9cf", "#f8fcf8", "#ef8a62"), bias = 1)
+  make_color_pal(c("#ef8a62", "#f8fcf8", "#67a9cf"), bias = 1)
+def_rating_color <-
+  make_color_pal(c("#ef8a62", "#f8fcf8", "#67a9cf"), bias = 1)
+  #make_color_pal(c("#67a9cf", "#f8fcf8", "#ef8a62"), bias = 1)
+
+team_rating_column <- function(maxWidth = 75, ...) {
+  colDef(
+    maxWidth = maxWidth,
+    align = "center",
+    class = "cell number",
+    headerStyle = list(fontWeight = "500"),
+    ...
+  )
+}
+
+table <-
+    reactable(
+      show_data,
+      pagination = FALSE,
+      showSortIcon = FALSE,
+      highlight = TRUE,
+      compact = TRUE,
+      #defaultSorted = "Home_EPA",
+      #defaultSortOrder = "desc",
+      defaultColDef = colDef(headerClass = "header colheader"),
+      columnGroups = list(
+        colGroup(
+          name = "Home Team Ranks",
+          columns = c("Home_EPA", "Home_EPA_Allowed"),
+          headerClass = "groupheader"
+        ),
+        colGroup(
+          name = "Away Team Ranks",
+          columns = c("Away_EPA", "Away_EPA_Allowed"),
+          headerClass = "groupheader"
+        )
+      ),
+      # Add border between Divisions when sorting by Division
+      columns = list(
+      Home_EPA = team_rating_column(
+          name = "EPA",
+          cell = function(value) {
+          ### Normalize team rating in order to assign color from color palette
+            normalized <-
+              (value - min(unlist(NFL_table_clean$Home_EPA))) / (max(unlist(NFL_table_clean$Home_EPA)) - min(unlist(NFL_table_clean$Home_EPA)))
+            color <- off_rating_color(normalized)
+            value <- format(value, nsmall = 1, digits = 1)
+            ### Round corners of cell
+            div(class = "roundcorners",
+                style = list(background = color),
+                value)
+          }
+        ),
+        Home_EPA_Allowed = team_rating_column(
+          name = "EPA Allowed",
+          cell = function(value) {
+          ### Normalize team rating in order to assign color from color palette
+            normalized <- (value - min(unlist(NFL_table_clean$Home_EPA_Allowed))) / 
+              (max(unlist(NFL_table_clean$Home_EPA_Allowed)) - min(unlist(NFL_table_clean$Home_EPA_Allowed)))
+            
+            color <- def_rating_color(normalized)
+            value <- format(value, nsmall = 1, digits = 1)
+            ### Round corners of cell
+            div(class = "roundcorners",
+                style = list(background = color),
+                value)
+          }
+        ),
+      Home = colDef(
+        minWidth = 100,
+        maxWidth = 250,
+        align = 'center',
+        class = "cell",
+        cell = function(value, index) {
+          ### Team logos from images folder
+          img_src <- knitr::image_uri(sprintf("images/%s.png", value))
+          image <- img(class = "logo",
+                     src = img_src,
+                     alt = value)
+          div(class = "team", image,
+            ### Team name
+            div(class = "team-name", value),
+            ### Team record
+            div(class = "record",  sprintf("(%s)", NFL_table_clean[index, "Home_Record"])))
+      }
+    ),
+    
+    Home_Proj = colDef(
+          maxWidth = 55,
+          ### Add column border to right side of column
+          class = "cell number border-left",
+          headerStyle = list(fontWeight = "500"),
+          ### For any positive number, add "+" sign. For any negative number leave as is
+          # cell = function(value) {
+          #   if (value > 0)
+          #     paste0("+", value)
+          #   else
+          #     value
+          # },
+          ### For any positive number, assign green color. For any negative number assign red color
+          style = function(value) {
+            if (value > 20) {
+              color <- "#008000"
+            } else if (value < 20) {
+              color <- "#e00000"
+            } else {
+              color <- "#777"
+            }
+            list(color = color)
+          }
+        ),
+        Away_Proj = colDef(
+          maxWidth = 55,
+          ### Add column border to right side of column
+          class = "cell number border-right ",
+          headerStyle = list(fontWeight = "500"),
+          ### For any positive number, add "+" sign. For any negative number leave as is
+          # cell = function(value) {
+          #   if (value > 0)
+          #     paste0("+", value)
+          #   else
+          #     value
+          # },
+          ### For any positive number, assign green color. For any negative number assign red color
+          style = function(value) {
+            if (value > 20) {
+              color <- "#008000"
+            } else if (value < 20) {
+              color <- "#e00000"
+            } else {
+              color <- "#777"
+            }
+            list(color = color)
+          }
+        ),
+    
+      Away = colDef(
+        minWidth = 100,
+        maxWidth = 250,
+        class = "cell",
+        align = 'center',
+        cell = function(value, index) {
+          ### Team logos from images folder
+          img_src <- knitr::image_uri(sprintf("images/%s.png", value))
+          image <- img(class = "logo",
+                     src = img_src,
+                     alt = value)
+          div(class = "team", image,
+            ### Team name
+            div(class = "team-name", value),
+            ### Team record
+            div(class = "record",  sprintf("(%s)", NFL_table_clean[index, "Away_Record"])))
+      }
+    ),
+    
+        Away_EPA_Allowed = team_rating_column(
+          name = "EPA Allowed",
+          cell = function(value) {
+          ### Normalize team rating in order to assign color from color palette
+            normalized <- (value - min(unlist(NFL_table_clean$Away_EPA_Allowed))) / 
+              (max(unlist(NFL_table_clean$Away_EPA_Allowed)) - min(unlist(NFL_table_clean$Away_EPA_Allowed)))
+            
+            color <- def_rating_color(normalized)
+            value <- format(value, nsmall = 1, digits = 1)
+            ### Round corners of cell
+            div(class = "roundcorners",
+                style = list(background = color),
+                value)
+          }
+        ),
+    
+      Away_EPA = team_rating_column(
+          name = "EPA",
+          cell = function(value) {
+          ### Normalize team rating in order to assign color from color palette
+            normalized <-
+              (value - min(unlist(NFL_table_clean$Away_EPA))) / (max(unlist(NFL_table_clean$Away_EPA)) - min(unlist(NFL_table_clean$Away_EPA)))
+            color <- off_rating_color(normalized)
+            value <- format(value, nsmall = 1, digits = 1)
+            ### Round corners of cell
+            div(class = "roundcorners",
+                style = list(background = color),
+                value)
+          }
+        ),
+      Home_Record = colDef(show = FALSE),
+        SRS = team_rating_column(
+          name = "Total",
+          cell = function(value) {
+            ### Normalize team rating in order to assign color from color palette
+            normalized <-
+              (value - min(unlist(NFL_table_clean$Home_EPA))) / (max(unlist(NFL_table_clean$Home_EPA)) - min(unlist(NFL_table_clean$Home_EPA)))
+            value <- format(value, nsmall = 1, digits = 1)
+            ### Round corners of cell
+            div(class = "roundcorners",
+                style = list(background = color),
+                value)
+          }
+        ),
+            Away_Record = colDef(show = FALSE),
+        SRS = team_rating_column(
+          name = "Total",
+          cell = function(value) {
+            ### Normalize team rating in order to assign color from color palette
+            normalized <-
+              (value - min(unlist(NFL_table_clean$Away_EPA))) / (max(unlist(NFL_table_clean$Away_EPA)) - min(unlist(NFL_table_clean$Away_EPA)))
+            value <- format(value, nsmall = 1, digits = 1)
+            ### Round corners of cell
+            div(class = "roundcorners",
+                style = list(background = color),
+                value)
+          }
+        )
+      )
+    )
+
+### Add title and subtitle to top of page above table
+div(class = "team-ratings",
+    div(class = "title",
+        h2("2024 NFL Projections (Week 1)"),
+        "Game Projections the 2024 NFL season"),
+  table,
+  ### Add legend and source below the table
+  tags$span(
+    style = "color:#777",
+    "Note: EPA ranks are adusted ranks for the current season based on concluded games", 
+    # ### In order to display icons with color, needed to create a new css class for the symbols that contained a color option
+    # tagAppendAttributes(shiny::icon("circle", class = "green-circle-legend")), "= Easy",
+    # tagAppendAttributes(shiny::icon("square", class = "blue-square-legend")), "= Moderate",  
+    # tagAppendAttributes(shiny::icon("square", class = "black-diamond-legend1")), "= Difficult", 
+    # list(tagAppendAttributes(shiny::icon("square", class = "black-diamond-legend1")),
+    #                tagAppendAttributes(shiny::icon("square", class = "black-diamond-legend2"))), "= Most Difficult",
+    div(
+    "Table created by: Statletics  •  Data: Pro-Football-Reference.com")
+  )
+)
+### Add title and subtitle to top of page above table
+### Add title and subtitle to top of page above table
+# div(class = "team-ratings",
+#     div(class = "title",
+#         h2("2023 NFL Team Rating & Stats"),
+#         "Ratings and results from every NFL team from the 2023 season"),
+#   table,
+#   ### Add legend and source below the table
+#   tags$span(
+#     style = "color:#777",
+#     "Note: Strength of Schedule (SoS) aligns with the ski trail difficulty rating system:", 
+#     ### In order to display icons with color, needed to create a new css class for the symbols that contained a color option
+#     tagAppendAttributes(shiny::icon("circle", class = "green-circle-legend")), "= Easy",
+#     tagAppendAttributes(shiny::icon("square", class = "blue-square-legend")), "= Moderate",  
+#     tagAppendAttributes(shiny::icon("square", class = "black-diamond-legend1")), "= Difficult", 
+#     list(tagAppendAttributes(shiny::icon("square", class = "black-diamond-legend1")),
+#                    tagAppendAttributes(shiny::icon("square", class = "black-diamond-legend2"))), "= Most Difficult",
+#     div(
+#     "Table created by: Statletics  •  Data: Pro-Football-Reference.com")
+#   )
+# )
+```
+
+```{r}
+### Load font from Google Fonts
+tags$link(href = "https://fonts.googleapis.com/css?family=Karla:400,700|Fira+Mono&display=fallback", rel = "stylesheet")
+```
+
+
+```{css}
+/* Row and column borders */
+.cell {
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.07);
+}
+
+.border-left {
+  border-left: 1px solid #777;
+}
+
+.border-right {
+  border-right: 1px solid #777;
+}
+
+.Division-last .cell {
+  box-shadow: inset 0 -1px 0 #777;
+}
+
+
+/* Column header hover formatting */
+.header:hover,
+.header[aria-sort="ascending"],
+.header[aria-sort="descending"] {
+  background-color: #b3b3b3;
+  color: #fff;
+}
+
+.header:active,
+.header[aria-sort="ascending"],
+.header[aria-sort="descending"] {
+  background-color: #555;
+  color: #fff;
+}
+
+
+/* Column header formatting */
+.colheader {
+  font-family: "Open Sans", sans-serif;
+  font-size: 15px;
+  border-bottom: 2px solid #555;
+}
+
+.groupheader {
+  font-family: "Open Sans", sans-serif;
+  font-size: 15px;
+}
+
+
+/* Number formatting */
+.number {
+  font-family: "Fira Mono", Consolas, Monaco, monospace;
+  font-size: 13px;
+  line-height: 30px;
+  white-space: pre;
+}
+
+/* Text formatting */
+.team-ratings {
+  font-family: Karla, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 12px;
+}
+
+
+/* Division column formatting */
+.division-name {
+  font-family: Karla, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 30px;
+}
+
+
+/* Team column formatting */
+.team {
+  display: flex;
+  align-items: baseline;
+}
+
+.logo {
+  margin-right: 10px;
+  height: 24px;
+}
+
+.team-name {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.record {
+  margin-left: 4px;
+  color: #999;
+  font-size: 13px;
+}
+
+
+/* Rotate SoS square into a diamond */
+.rotate{
+  transform: rotate(45deg);
+}
+
+
+/* Round corners under Team Rating columns */
+.roundcorners {
+  border-radius: 10px;
+  color: #000;
+  padding-bottom: 2px;
+  padding-right: 2px;
+  width: 46px;
+  height: 28px;
+}
+
+
+/* Formatting for title above table */
+.title {
+  font-family: "Open Sans", sans-serif;
+  font-size: 16px;
+  margin: 16px 0;
+}
+
+
+/* SoS legend symbols underneath chart */
+.black-diamond-legend1{
+  transform: rotate(45deg);
+  color: #000;
+  margin-left: 7px;
+}
+
+.black-diamond-legend2{
+  transform: rotate(45deg);
+  color: #000;
+}
+
+.green-circle-legend{
+  color: #008000;
+  margin-left: 7px;
+}
+
+.blue-square-legend{
+  color: #0000FF;
+  margin-left: 7px;
+}
+```
+
