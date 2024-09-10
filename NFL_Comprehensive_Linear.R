@@ -49,16 +49,21 @@ meansd <- function(x, ...) {
 }
 
 
-pbp <- load_pbp(2023)
+pbp <- load_pbp(seasons=c(2022,2023,2024))
 pbp <- add_qb_epa(pbp)
 factor(pbp$posteam)
 colnames(pbp)
+
+#elo<-read_csv("https://projects.fivethirtyeight.com/nfl-api/nfl_elo.csv")
+
 
 players<-calculate_player_stats(pbp=pbp)
 quarterbacks<-players[which(players$position == "QB"),'player_id']
 
 qb_map <-  pbp %>%
-  filter(season_type == "REG", down %in% c(1, 2, 3, 4), punt_attempt == 0, passer_player_id %in% quarterbacks$player_id) %>%
+  filter(season_type == "REG" & down %in% c(1, 2, 3, 4) & punt_attempt == 0 
+         & passer_player_id %in% quarterbacks$player_id 
+         & season %in% c(2023,2024)) %>%
   group_by(passer_player_id,posteam_type) %>% 
   summarise(
     QB_name = max(passer_player_name,na.rm = TRUE),
@@ -67,7 +72,7 @@ qb_map <-  pbp %>%
     
   )
 
-# qb_map$QB_EPA<-scale(qb_map$QB_EPA)
+#qb_map$QB_EPA<-scale(qb_map$QB_EPA)
 # qb_map$pass_ypa<-scale(qb_map$pass_ypa)
 
 
@@ -124,9 +129,16 @@ df_def<- pbp %>%
 
 
 
+
 df<-cbind(df_off,df_def)
-
-
+# df['elo']<-0
+# df['opponent_elo']<-0
+# 
+# for (row in 1:nrow(df)){
+#   temp_elo<- elo %>% 
+#     filter()
+# df$elo[row] <- elo[which()]  
+# }
 
   ####### INPUTS #########
   
@@ -273,7 +285,7 @@ df<-cbind(df_off,df_def)
   
   
   season=2024
-  week=1
+  week=2
   j=5
   
   
@@ -297,9 +309,13 @@ df<-cbind(df_off,df_def)
   away_id = schedule$away_team[j]
   
   home_df <- df %>% 
-    filter((posteam == home_id | defteam == home_id) & home_team == home_id)
+    filter( (posteam == home_id | defteam == home_id) & home_team == home_id) %>% 
+    do(tail(., 5))
+  
   away_df <- df %>% 
-    filter((posteam == away_id | defteam == away_id) & away_team == away_id)
+    filter((posteam == away_id | defteam == away_id) & away_team == away_id) %>% 
+    do(tail(., 5))
+  
   
   QBH = qb_map$QB_name[which(qb_map$passer_player_id == schedule$home_qb_id[j] & qb_map$posteam_type == 'home' )]
   QBA = qb_map$QB_name[which(qb_map$passer_player_id == schedule$away_qb_id[j]  & qb_map$posteam_type == 'away')]
@@ -388,9 +404,11 @@ df<-cbind(df_off,df_def)
      
       
       home_df <- df %>% 
-        filter((posteam == home_id | defteam == home_id) & home_team == home_id)
+        filter((posteam == home_id | defteam == home_id) & home_team == home_id)%>% 
+        do(tail(., 5))
       away_df <- df %>% 
-        filter((posteam == away_id | defteam == away_id) & away_team == away_id)
+        filter((posteam == away_id | defteam == away_id) & away_team == away_id)%>% 
+        do(tail(., 5))
       
       QBH = qb_map$QB_name[which(qb_map$passer_player_id == schedule$home_qb_id & qb_map$posteam_type == 'home' )]
       QBA = qb_map$QB_name[which(qb_map$passer_player_id == schedule$away_qb_id  & qb_map$posteam_type == 'away')]
@@ -461,5 +479,5 @@ df<-cbind(df_off,df_def)
 
 
   
-  PROJECTIONS(week=1,season=2024,df, mix_vegas = TRUE)
+  PROJECTIONS(week=2,season=2024,df, mix_vegas = FALSE)
   

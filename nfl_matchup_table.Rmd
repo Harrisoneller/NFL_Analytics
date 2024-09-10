@@ -26,7 +26,7 @@ source("NFL_Comprehensive_Linear.R")
 schedule<-load_schedules(2024)
   schedule <- schedule[which(schedule$week == 1),]
 
-proj <- PROJECTIONS(week=1,season=2024,df, mix_vegas = TRUE)
+proj <- PROJECTIONS(week=2,season=2024,df, mix_vegas = TRUE)
 
 info <- nflfastR::teams_colors_logos
 nfc <- info %>%
@@ -259,7 +259,8 @@ NFL_table_clean <- schedule %>%
     
   )
 
-
+# show_data<-NFL_table_clean %>% 
+#   filter(Home == "Browns")
 ```
 
 
@@ -316,7 +317,7 @@ team_rating_column <- function(maxWidth = 75, ...) {
 
 table <-
     reactable(
-      show_data,
+      NFL_table_clean,
       pagination = FALSE,
       showSortIcon = FALSE,
       highlight = TRUE,
