@@ -19,14 +19,16 @@ library(nflfastR)
 library(nflreadr)
 library(nflverse)
 setwd("/Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics")
+
+week<-2
 ```
 
 ```{r,echo=FALSE,include = FALSE}
 source("NFL_Comprehensive_Linear.R")
 schedule<-load_schedules(2024)
-  schedule <- schedule[which(schedule$week == 1),]
+schedule <- schedule[which(schedule$week == week),]
 
-proj <- PROJECTIONS(week=2,season=2024,df, mix_vegas = TRUE)
+proj <- PROJECTIONS(week=week,season=2024,df, mix_vegas = TRUE)
 
 info <- nflfastR::teams_colors_logos
 nfc <- info %>%
@@ -40,12 +42,11 @@ meansd <- function(x, ...) {
   c(mean - sd, mean, mean + sd)
 }
 
-pbp <- load_pbp(2023)
+pbp <- load_pbp(c(2023,2024))
 pbp<- clean_pbp(pbp)
 pbp <- add_qb_epa(pbp)
 factor(pbp$posteam)
-schedule <- load_schedules(seasons = 2024)
-schedule <- schedule[which(schedule$week == 1),]
+
 team_info<-teams_colors_logos
 
 df_off <- pbp %>%
@@ -519,7 +520,7 @@ table <-
 ### Add title and subtitle to top of page above table
 div(class = "team-ratings",
     div(class = "title",
-        h2("2024 NFL Projections (Week 1)"),
+        h2("2024 NFL Projections (Week 3)"),
         "Game Projections the 2024 NFL season"),
   table,
   ### Add legend and source below the table
