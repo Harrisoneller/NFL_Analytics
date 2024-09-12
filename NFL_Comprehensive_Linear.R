@@ -284,11 +284,7 @@ df<-cbind(df_off,df_def)
   
   
   
-  season=2024
-  week=2
-  j=5
-  
-  
+
 
   
   PROJECTIONS <- function(week,season,df,mix_vegas=FALSE,custom_input = FALSE,home_id=FALSE,away_id=FALSE, home_qb_id=FALSE,away_qb_id=FALSE){
@@ -479,5 +475,5 @@ df<-cbind(df_off,df_def)
 
 
   
-  PROJECTIONS(week=2,season=2024,df, mix_vegas = FALSE)
+  #PROJECTIONS(week=2,season=2024,df, mix_vegas = FALSE)
   

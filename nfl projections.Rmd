@@ -1,0 +1,191 @@
+---
+title: "NFL Model"
+author: "Harrison Eller"
+date: "2024-09-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(nflfastR)
+library(tidyverse)
+library(nflplotR)
+library(ggplot2)
+library(extrafont)
+library(ggrepel)
+library(ggimage)
+library(ggridges)
+library(ggtext)
+library(ggfx)
+library(geomtextpath)
+library(cropcircles)
+library(magick)
+library(glue)
+library(gt)
+library(gtExtras)
+library(nflverse)
+library(xgboost)
+library(xtable)
+
+library(stringr)
+library(tidyverse)
+library(nnet)
+library(mgcv)
+library(texreg)
+library(aod)
+library(xtable)
+library(xgboost)
+library(readr)
+library(stringr)
+library(caret)
+library(car)
+library(tidyverse)
+library(gt)
+library(gsisdecoder)
+setwd("/Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics")
+```
+
+
+```{r}
+
+################# data prep ###########################
+
+info <- nflfastR::teams_colors_logos
+nfc <- info %>%
+  filter(team_conf == "NFC")
+afc <- info %>%
+  filter(team_conf == "AFC")
+### creating function to add SD, mean, and mean + sd
+meansd <- function(x, ...) {
+  mean <- mean(x)
+  sd <- sd(x)
+  c(mean - sd, mean, mean + sd)
+}
+
+
+pbp <- load_pbp(seasons=c(2022,2023,2024))
+pbp <- add_qb_epa(pbp)
+factor(pbp$posteam)
+colnames(pbp)
+
+#elo<-read_csv("https://projects.fivethirtyeight.com/nfl-api/nfl_elo.csv")
+
+
+players<-calculate_player_stats(pbp=pbp)
+quarterbacks<-players[which(players$position == "QB"),'player_id']
+
+qb_map <-  pbp %>%
+  filter(season_type == "REG" & down %in% c(1, 2, 3, 4) & punt_attempt == 0 
+         & passer_player_id %in% quarterbacks$player_id 
+         & season %in% c(2023,2024)) %>%
+  group_by(passer_player_id,posteam_type) %>% 
+  summarise(
+    QB_name = max(passer_player_name,na.rm = TRUE),
+    QB_EPA = median(qb_epa,na.rm = TRUE),
+    pass_ypa =  sum(passing_yards,na.rm = TRUE)/sum(pass_attempt,na.rm = TRUE)
+    
+  )
+
+#qb_map$QB_EPA<-scale(qb_map$QB_EPA)
+# qb_map$pass_ypa<-scale(qb_map$pass_ypa)
+
+
+
+df_off <- pbp %>%
+  filter(season_type == "REG", down %in% c(1, 2, 3, 4), punt_attempt == 0) %>%
+  group_by(posteam, game_id )%>%
+  summarise(
+    OFF_EPA = mean(epa, na.rm = TRUE),
+    QB_EPA = mean(qb_epa,na.rm = TRUE),
+    QB = max(passer_player_name,na.rm = TRUE),
+    fumble = sum(fumble_lost),
+    interception = sum(interception),
+    pass_ypa = sum(passing_yards,na.rm = TRUE)/sum(pass_attempt,na.rm = TRUE),
+    rush_ypa = sum(rushing_yards,na.rm = TRUE)/sum(rush_attempt,na.rm = TRUE),
+    pass_yds = sum(passing_yards,na.rm = TRUE),
+    rush_yds = sum(rushing_yards,na.rm = TRUE),
+    ypp = sum(sum(rushing_yards,na.rm = TRUE) + sum(passing_yards,na.rm = TRUE))/n(),
+    drives = max(drive,na.rm = TRUE)/2,
+    #    home_points = max(home_score,na.rm = TRUE),
+    #    away_points = max(away_score,na.rm = TRUE),
+    home_team = max(home_team,na.rm = TRUE),
+    pressures_allowed = (sum(sack,na.rm = TRUE)+sum(qb_hit,na.rm = TRUE) ), 
+    total_plays_off = n(),
+    points = if_else(max(posteam,na.rm = TRUE) == max(home_team,na.rm = TRUE), max(home_score,na.rm = TRUE),max(away_score,na.rm = TRUE))
+    
+  )
+
+
+df_def<- pbp %>%
+  filter(season_type == "REG", down %in% c(1, 2, 3, 4), punt_attempt == 0) %>%
+  group_by(defteam, game_id )%>%
+  summarise(
+    OFF_EPA_allowed = mean(epa, na.rm = TRUE),
+    QB_EPA_allowed = mean(qb_epa,na.rm = TRUE),
+    #QB = max(passer_player_name,na.rm = TRUE),
+    fumbles_forced = sum(fumble_lost),
+    interceptions_forced = sum(interception),
+    pass_ypa_allowed = sum(passing_yards,na.rm = TRUE)/sum(pass_attempt,na.rm = TRUE),
+    rush_ypa_allowed = sum(rushing_yards,na.rm = TRUE)/sum(rush_attempt,na.rm = TRUE),
+    pass_yds_allowed = sum(passing_yards,na.rm = TRUE),
+    rush_yds_allowed = sum(rushing_yards,na.rm = TRUE),
+    ypp_allowed = sum(sum(rushing_yards,na.rm = TRUE) + sum(passing_yards,na.rm = TRUE))/n(),
+    drives_allowed = max(drive,na.rm = TRUE)/2,
+    #    home_points = max(home_score,na.rm = TRUE),
+    #    away_points = max(away_score,na.rm = TRUE),
+    away_team = max(away_team,na.rm = TRUE),
+    pressures_forced = (sum(sack,na.rm = TRUE)+sum(qb_hit,na.rm = TRUE) ), 
+    total_plays_def = n(),
+    points_allowed = if_else(max(defteam,na.rm = TRUE) == max(home_team,na.rm = TRUE), max(away_score,na.rm = TRUE),max(home_score,na.rm = TRUE))
+    
+    
+  )
+
+
+df<- df_off %>% 
+  inner_join(df_def,by = c("game_id"="game_id","posteam"="defteam"))
+```
+
+```{r}
+elo<-read_csv("https://projects.fivethirtyeight.com/nfl-api/nfl_elo.csv")
+elo<-elo[which(elo$season == 2022),]
+```
+
+
+```{python}
+from nfl_dev import nfl_dev
+import pandas as pd
+
+out_elo, elo_2022 = nfl_dev().get_current_elo(input_season=2022)
+out_elo, elo_2023 = nfl_dev().get_current_elo(input_season=2023)
+out_elo, elo_2024 = nfl_dev().get_current_elo(input_season=2024)
+elo_2022['season']=2022
+elo_2023['season']=2023
+elo_2024['season']=2024
+
+
+elo=pd.concat([elo_2022,elo_2023,elo_2024])
+elo['team'] = elo.index
+r.elo=elo
+```
+
+
+```{r}
+dfc<-df %>% 
+  filter(posteam == 'ATL')
+dfc['elo']<-
+
+temp_elo<-elo %>% filter(team == 'Atlanta Falcons')
+
+elo_list <- do.call(c, unlist(temp_elo$elo[1:3], recursive=FALSE)) 
+
+for (game in 1:row(dfc)){
+  dfc
+}
+```
+
+
+```{r}
+
+```
+

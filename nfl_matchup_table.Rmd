@@ -151,6 +151,8 @@ for (j in 1:nrow(schedule)){
   
 
 }
+
+
   
 ```
 
@@ -260,8 +262,8 @@ NFL_table_clean <- schedule %>%
     
   )
 
-# show_data<-NFL_table_clean %>% 
-#   filter(Home == "Browns")
+show_data<-NFL_table_clean %>% 
+  filter(Home == "Eagles")
 ```
 
 
@@ -318,7 +320,7 @@ team_rating_column <- function(maxWidth = 75, ...) {
 
 table <-
     reactable(
-      NFL_table_clean,
+      show_data,
       pagination = FALSE,
       showSortIcon = FALSE,
       highlight = TRUE,
