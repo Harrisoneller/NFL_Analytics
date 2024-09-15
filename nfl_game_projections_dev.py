@@ -19,6 +19,7 @@ from sklearn.model_selection import train_test_split
 # Calculate ELO rating for NFL teams using data scraped from web
 # Starting out with calculating # of wins
 from nfl_dev import nfl_dev
+import tensorflow as tf
 # class Team:
 #     import numpy as np 
 #     import pandas as pd
@@ -295,17 +296,25 @@ from nfl_dev import nfl_dev
 #     team_ref['Current ELO'] = [ a[-1] for a in team_ref['elo'] ]
     
 #     return team_ref['Current ELO'],team_ref
+new_index = ['ARI', 'ATL', 'BAL', 'BUF', 'CAR', 'CHI', 'CIN', 'CLE', 'DAL', 'DEN',
+       'DET', 'GB', 'HOU', 'IND', 'JAX', 'KC', 'LV', 'LAC', 'LA', 'MIA', 'MIN',
+       'NE', 'NO', 'NYG', 'NYJ', 'PHI', 'PIT', 'SEA', 'SF', 'TB', 'TEN',
+       'WAS']
 
-
-
+out_elo, team_ref_2022= nfl_dev().get_current_elo(input_season=2022)
+team_ref_2022['season']=None
+team_ref_2022['season']=2022
 out_elo, team_ref_2023= nfl_dev().get_current_elo(input_season=2023)
 team_ref_2023['season']=None
 team_ref_2023['season']=2023
 out_elo, team_ref_2024= nfl_dev().get_current_elo(input_season=2024)
 team_ref_2024['season']=None
 team_ref_2024['season']=2024
+team_ref_2022.index = new_index
+team_ref_2023.index = new_index
+team_ref_2024.index = new_index
 
-
+len(team_ref_2022.loc['ATL','elo'])
 
 ######################################################################################################################################################################################
 import nfl_data_py as nfl_data
@@ -324,166 +333,293 @@ teams = nfl_data.import_team_desc()
 
 
 
-pbp = nfl.load_nfl_pbp(seasons=([2023,2024]),return_as_pandas=True)
-data=pbp
-
-teams.loc[teams['team_abbr'] == 'BAL','team_name']
+pbp = nfl.load_nfl_pbp(seasons=([2022, 2023,2024]),return_as_pandas=True)
 
 
-for game in range(len(s)):
+# pbp = pbp[(pbp.kickoff_attempt == 0) & (pbp.punt_attempt == 0) & (pbp.field_goal_attempt == 0)
+#           & (pbp.down.isin([1,2,3,4])) & (pbp.penalty == 0)]
+pbp = pbp[((pbp['pass'] == 1) | (pbp['rush'] == 1)) & ( pbp.season_type == "REG")]
+mask = {'home':1,'away':0}
+pbp.posteam_type = pbp.posteam_type.map(mask)
+
+pbp['elo']=1400
+
+for play in pbp.index:
+    if pbp.loc[play,'season'] == 2022:
+        pbp.loc[play,'elo'] = team_ref_2022.loc[pbp.loc[play,'posteam'],'elo'][int(pbp.loc[play,'week'])-1]
+    elif pbp.loc[play,'season'] == 2023:
+        pbp.loc[play,'elo'] = team_ref_2023.loc[pbp.loc[play,'posteam'],'elo'][int(pbp.loc[play,'week'])-1]
+    else:
+        pbp.loc[play,'elo'] = team_ref_2024.loc[pbp.loc[play,'posteam'],'elo'][int(pbp.loc[play,'week'])-1]
+
+        
+
+cols = pbp.select_dtypes(include = 'number').columns
+df_off = pbp.groupby(['posteam','game_id'])[cols].agg(['min','max','sum','median','size'])
+df_def = pbp.groupby(['defteam','game_id'])[cols].agg(['min','max','sum','median','size'])
+
+test = pbp.groupby(['posteam','defteam','game_id'])[cols].agg(['min','max','sum','median','size'])
+
+df_def = df_def.add_suffix('_allowed')
+df_off.index = df_off.index.rename(['team','game_id']);df_def.index = df_def.index.rename(['team','game_id'])
+
+
+df = df_off.join(df_def)
+
+# data_sum_off = ['game_id','air_yards','epa','passing_yards','rushing_yards','receiving_yards','interception','fumble_lost','touchdown','score_differential']
+# data_sum_def = ['game_id','interception','fumble_lost','epa','passing_yards','rushing_yards','receiving_yards']
+# columns = {'interception':'interceptions_gained','fumble_lost':'fumble_gained','epa':'epa_allowed','passing_yards':'passing_yards_allowed','rushing_yards':'rushing_yards_allowed','receiving_yards':'receiving_yards_allowed'} )
+
+
+
+
+#df_off.loc[('DAL', ...)]
+df.loc[('DAL', ...)]['posteam_score']['max']
+
+
+
+data = pd.DataFrame({'epa':None, 'pass_ypa':None, 'rush_ypa':None, 'turnovers':None, 'takeaways':None,'home_away':None, 'elo':None,
+              'pressures_allowed':None, 'total_plays':None, 'points':None,
+              
+              'epa_allowed':None, 'pass_ypa_allowed':None, 'rush_ypa_allowed':None, 'opponent_elo':None,
+              'pressures':None, 'total_plays_allowed':None, }, index = [])
+
+
+for team in df.index.levels[0]:
     
-    # home_team_input = f"{s['games'][game]['homeTeam']['fullName']}"
-    # away_team_input = f"{s['games'][game]['awayTeam']['fullName']}"
-    home_abbr = s.loc[s['game_id'] == gid[game], 'home_team'].values[0]
-    away_abbr = s.loc[s['game_id'] == gid[game], 'away_team'].values[0]
-    home_team_input = f"{teams.loc[teams['team_abbr'] == home_abbr,'team_name'].values[0]}"
-    away_team_input = f"{teams.loc[teams['team_abbr'] == away_abbr,'team_name'].values[0]}"
+    temp = pd.DataFrame({'team':team,
+                'epa':df.loc[(team, ...)]['epa']['median'], 
+                'pass_ypa':df.loc[(team, ...)]['passing_yards']['sum']/(df.loc[(team, ...)]['pass_attempt']['sum'] - df.loc[(team, ...)]['sack']['sum']), 
+                'rush_ypa':df.loc[(team, ...)]['rushing_yards']['sum']/(df.loc[(team, ...)]['rush_attempt']['sum']),
+                'turnovers':df.loc[(team, ...)]['interception']['sum']+df.loc[(team, ...)]['fumble']['sum'], 
+                'takeaways':df.loc[(team, ...)]['interception_allowed']['sum_allowed']+df.loc[(team, ...)]['fumble_allowed']['sum_allowed'],
+                'home_away':df.loc[(team, ...)]['posteam_type']['median'],
+                'elo':df.loc[(team, ...)]['elo']['median'],
+                'points': df.loc[(team, ...)]['posteam_score']['max'],
+                'pressures_allowed':df.loc[(team, ...)]['sack']['sum'], 
+                'total_plays':df.loc[(team, ...)]['play_id']['size'], 
+                'epa_allowed':df.loc[(team, ...)]['epa_allowed']['median_allowed'], 
+                'pass_ypa_allowed':df.loc[(team, ...)]['passing_yards_allowed']['sum_allowed']/(df.loc[(team, ...)]['pass_attempt_allowed']['sum_allowed'] - df.loc[(team, ...)]['sack_allowed']['sum_allowed']), 
+                'rush_ypa_allowed':df.loc[(team, ...)]['rushing_yards_allowed']['sum_allowed']/(df.loc[(team, ...)]['rush_attempt_allowed']['sum_allowed']), 
+                'opponent_elo':df.loc[(team, ...)]['elo_allowed']['median_allowed'],
+                'pressures':df.loc[(team, ...)]['sack_allowed']['sum_allowed'], 
+                'total_plays_allowed':df.loc[(team, ...)]['play_id_allowed']['size_allowed']},
+                index = df.loc[(team, ...)].index )
+    data = pd.concat([data,temp])
 
-    # home_team_input = "New York Giants"
-    # away_team_input = "Dallas Cowboys"
 
 
-    # hist_elo = pd.read_csv('nfl_historical_elo.csv')
-    # hist_elo = hist_elo[hist_elo.season > 2020]
 
-    # ############################################################### data preparation
+from sklearn.model_selection import train_test_split
+
+for col in data.columns:
+    if col not in ['team']:
+        data[col] = data[col].astype('float32')
+         
+data.opponent_elo = data.opponent_elo.astype('float32')
+data.elo = data.elo.astype('float32')
+data.home_away = data.home_away.astype('int')
+
+train_df, test_df = train_test_split(data, test_size=0.2, random_state=42)
+
+X_train = train_df.drop(['points','team'],axis=1)
+y_train = train_df.points
+X_test = test_df.drop(['points','team'],axis=1)
+y_test = test_df.points
+
+
+
+
+inputs = tf.keras.Input(shape=(len(X_train.columns),), name = 'input')
+hidden1 = tf.keras.layers.Dense(units = 500, activation = 'relu', name = 'hidden1')(inputs)
+hidden2 = tf.keras.layers.Dense(units = 200, activation = 'relu', name = 'hidden2')(hidden1)
+dropout1 = tf.keras.layers.Dropout(rate = .2)(hidden2)
+hidden3 = tf.keras.layers.Dense(units = 50, activation = 'relu', name = 'hidden3')(dropout1)
+dropout2 = tf.keras.layers.Dropout(rate = .2)(hidden3)
+hidden4 = tf.keras.layers.Dense(units = 15, activation = 'relu', name = 'hidden4')(dropout2)
+dropout3 = tf.keras.layers.Dropout(rate = .2)(hidden4)
+hidden5 = tf.keras.layers.Dense(units = 5, activation = 'relu', kernel_regularizer = tf.keras.regularizers.L1(.01), name = 'hidden5')(dropout3)
+output = tf.keras.layers.Dense(units = 1, activation = 'linear', name = 'output')(hidden5)
+
+
+#hp_learning_rate = hp.Choice("learning_rate", values=[1e-2, 1e-3, 1e-4])
+model = 0
+model = tf.keras.Model(inputs = inputs, outputs = output)
+model.compile(loss = 'mae', optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001))# metrics = ['mae'])
+stop_early = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=33)
+
+history = model.fit(x = X_train,y=y_train, validation_split=.15,callbacks = [stop_early],  batch_size = 1, epochs = 100)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# for game in range(len(s)):
     
-    dfh = nfl_dev().season(team=f'{home_team_input}',data=pbp)
+#     # home_team_input = f"{s['games'][game]['homeTeam']['fullName']}"
+#     # away_team_input = f"{s['games'][game]['awayTeam']['fullName']}"
+#     home_abbr = s.loc[s['game_id'] == gid[game], 'home_team'].values[0]
+#     away_abbr = s.loc[s['game_id'] == gid[game], 'away_team'].values[0]
+#     home_team_input = f"{teams.loc[teams['team_abbr'] == home_abbr,'team_name'].values[0]}"
+#     away_team_input = f"{teams.loc[teams['team_abbr'] == away_abbr,'team_name'].values[0]}"
+
+#     # home_team_input = "New York Giants"
+#     # away_team_input = "Dallas Cowboys"
+
+
+#     # hist_elo = pd.read_csv('nfl_historical_elo.csv')
+#     # hist_elo = hist_elo[hist_elo.season > 2020]
+
+#     # ############################################################### data preparation
+    
+#     dfh = nfl_dev().season(team=f'{home_team_input}',data=pbp)
                                             
 
-    data_sum_off = ['game_id','air_yards','epa','passing_yards','rushing_yards','receiving_yards','interception','fumble_lost','touchdown','score_differential']
-    data_sum_def = ['game_id','interception','fumble_lost','epa','passing_yards','rushing_yards','receiving_yards']
+#     data_sum_off = ['game_id','air_yards','epa','passing_yards','rushing_yards','receiving_yards','interception','fumble_lost','touchdown','score_differential']
+#     data_sum_def = ['game_id','interception','fumble_lost','epa','passing_yards','rushing_yards','receiving_yards']
 
 
-    off=dfh[dfh['posteam']==home_abbr]
-    defense=dfh[dfh['defteam']==home_abbr]
+#     off=dfh[dfh['posteam']==home_abbr]
+#     defense=dfh[dfh['defteam']==home_abbr]
 
 
-    df_o = off[data_sum_off].groupby(by=['game_id']).sum()
-    df_d = defense[data_sum_def].groupby(by=['game_id']).sum()
-    df_d = df_d.rename(columns = {'interception':'interceptions_gained','fumble_lost':'fumble_gained','epa':'epa_allowed','passing_yards':'passing_yards_allowed','rushing_yards':'rushing_yards_allowed','receiving_yards':'receiving_yards_allowed'} )
+#     df_o = off[data_sum_off].groupby(by=['game_id']).sum()
+#     df_d = defense[data_sum_def].groupby(by=['game_id']).sum()
+#     df_d = df_d.rename(columns = {'interception':'interceptions_gained','fumble_lost':'fumble_gained','epa':'epa_allowed','passing_yards':'passing_yards_allowed','rushing_yards':'rushing_yards_allowed','receiving_yards':'receiving_yards_allowed'} )
 
 
-    for GID in df_o.index:
+#     for GID in df_o.index:
 
-        df_o.loc[GID,'score_differential'] = off[off['game_id'] == GID].score_differential.iloc[len(off[off.index == GID])-1]
-        if all(off.loc[off.game_id == GID,'home_team'] == home_abbr):
-            df_o.loc[GID,'points_scored'] = max(off.loc[off.game_id == GID,'total_home_score'].dropna())
-            df_d.loc[GID,'points_allowed'] = max(off.loc[off.game_id == GID,'total_away_score'].dropna())
-            df_o.loc[GID,'home_away'] = 1
-            df_o.loc[GID,'elo'] = 1
+#         df_o.loc[GID,'score_differential'] = off[off['game_id'] == GID].score_differential.iloc[len(off[off.index == GID])-1]
+#         if all(off.loc[off.game_id == GID,'home_team'] == home_abbr):
+#             df_o.loc[GID,'points_scored'] = max(off.loc[off.game_id == GID,'total_home_score'].dropna())
+#             df_d.loc[GID,'points_allowed'] = max(off.loc[off.game_id == GID,'total_away_score'].dropna())
+#             df_o.loc[GID,'home_away'] = 1
+#             df_o.loc[GID,'elo'] = 1
             
 
-        else:
-            df_d.loc[GID,'points_allowed'] = max(off.loc[off.game_id == GID,'total_home_score'].dropna())
-            df_o.loc[GID,'points_scored'] = max(off.loc[off.game_id == GID,'total_away_score'].dropna())
-            df_o.loc[GID,'home_away'] = 0
+#         else:
+#             df_d.loc[GID,'points_allowed'] = max(off.loc[off.game_id == GID,'total_home_score'].dropna())
+#             df_o.loc[GID,'points_scored'] = max(off.loc[off.game_id == GID,'total_away_score'].dropna())
+#             df_o.loc[GID,'home_away'] = 0
 
 
 
-    # for GID in df_o.index:
-    #     df_o.loc[GID,'score_differential'] = off[off['game_id'] == GID].score_differential.iloc[len(off[off.index == GID])-1]
+#     # for GID in df_o.index:
+#     #     df_o.loc[GID,'score_differential'] = off[off['game_id'] == GID].score_differential.iloc[len(off[off.index == GID])-1]
 
 
 
-    ht_df = pd.concat([df_o,df_d],axis=1)
+#     ht_df = pd.concat([df_o,df_d],axis=1)
 
-    ht_df['season']=None
+#     ht_df['season']=None
 
-    for i in range(len(ht_df)):
-        if ht_df.iloc[i].name[0:4] == '2023':
-            ht_df['season'].iloc[i] = 2023
-        else: 
-            ht_df['season'].iloc[i] = 2024
+#     for i in range(len(ht_df)):
+#         if ht_df.iloc[i].name[0:4] == '2023':
+#             ht_df['season'].iloc[i] = 2023
+#         else: 
+#             ht_df['season'].iloc[i] = 2024
 
-    elo_temp_home_2023 = pd.Series(list(team_ref_2023.loc[home_team_input,'elo']))
-    elo_temp_home_2024 = pd.Series(list(team_ref_2024.loc[home_team_input,'elo']))
+#     elo_temp_home_2023 = pd.Series(list(team_ref_2023.loc[home_team_input,'elo']))
+#     elo_temp_home_2024 = pd.Series(list(team_ref_2024.loc[home_team_input,'elo']))
 
-    ht_df['elo']=None
+#     ht_df['elo']=None
 
-    counter=0
-    for i in range(len(ht_df[ht_df['season'] == 2023])):
-        if i < (len(elo_temp_home_2023)-1):
-            ht_df.loc[ ht_df[ht_df.season == 2023].index[i],'elo'] = elo_temp_home_2023[i]
-        else: 
-            ht_df.loc[ ht_df[ht_df.season == 2023].index[i],'elo'] = team_ref_2023.loc[home_team_input,'Current ELO'] + counter*20
-            counter+=1
-
-
-    for i in range(len(ht_df[ht_df['season'] == 2024])):
-        try:ht_df.loc[ ht_df[ht_df.season == 2024].index[i],'elo'] = elo_temp_home_2024[i]
-        except: ht_df.loc[ ht_df[ht_df.season == 2024].index[i],'elo'] = team_ref_2024.loc[home_team_input,'Current ELO']
+#     counter=0
+#     for i in range(len(ht_df[ht_df['season'] == 2023])):
+#         if i < (len(elo_temp_home_2023)-1):
+#             ht_df.loc[ ht_df[ht_df.season == 2023].index[i],'elo'] = elo_temp_home_2023[i]
+#         else: 
+#             ht_df.loc[ ht_df[ht_df.season == 2023].index[i],'elo'] = team_ref_2023.loc[home_team_input,'Current ELO'] + counter*20
+#             counter+=1
 
 
+#     for i in range(len(ht_df[ht_df['season'] == 2024])):
+#         try:ht_df.loc[ ht_df[ht_df.season == 2024].index[i],'elo'] = elo_temp_home_2024[i]
+#         except: ht_df.loc[ ht_df[ht_df.season == 2024].index[i],'elo'] = team_ref_2024.loc[home_team_input,'Current ELO']
 
 
 
 
-    # ############################################################### data preparation
+
+
+#     # ############################################################### data preparation
    
 
-    dfa = nfl_dev().season(team=f'{away_team_input}',data=pbp)
+#     dfa = nfl_dev().season(team=f'{away_team_input}',data=pbp)
     
 
-    data_sum_off = ['game_id','air_yards','epa','passing_yards','rushing_yards','receiving_yards','interception','fumble_lost','touchdown','score_differential']
-    data_sum_def = ['game_id','interception','fumble_lost','epa','passing_yards','rushing_yards','receiving_yards']
+#     data_sum_off = ['game_id','air_yards','epa','passing_yards','rushing_yards','receiving_yards','interception','fumble_lost','touchdown','score_differential']
+#     data_sum_def = ['game_id','interception','fumble_lost','epa','passing_yards','rushing_yards','receiving_yards']
 
-    off=dfa[dfa['posteam']==away_abbr]
-
-
-    defense=dfa[dfa['defteam']==away_abbr]
-
-    df_o = off[data_sum_off].groupby(by=['game_id']).sum()
-    df_o['points_scored'] = 0
-    df_d['points_allowed'] = 0
-
-    df_d = defense[data_sum_def].groupby(by=['game_id']).sum()
-    df_d = df_d.rename(columns = {'interception':'interceptions_gained','fumble_lost':'fumble_gained','epa':'epa_allowed','passing_yards':'passing_yards_allowed','rushing_yards':'rushing_yards_allowed','receiving_yards':'receiving_yards_allowed'} )
+#     off=dfa[dfa['posteam']==away_abbr]
 
 
-    for GID in df_o.index:
+#     defense=dfa[dfa['defteam']==away_abbr]
 
-        df_o.loc[GID,'score_differential'] = off[off['game_id'] == GID].score_differential.iloc[len(off[off.index == GID])-1]
-        if all(off.loc[off.game_id == GID,'home_team'] == away_abbr):
-            df_o.loc[GID,'points_scored'] = max(off.loc[off.game_id == GID,'total_home_score'].dropna())
-            df_d.loc[GID,'points_allowed'] = max(off.loc[off.game_id == GID,'total_away_score'].dropna())
-            df_o.loc[GID,'home_away'] = 1
-        else:
-            df_d.loc[GID,'points_allowed'] = max(off.loc[off.game_id == GID,'total_home_score'].dropna())
-            df_o.loc[GID,'points_scored'] = max(off.loc[off.game_id == GID,'total_away_score'].dropna())
-            df_o.loc[GID,'home_away'] = 0
+#     df_o = off[data_sum_off].groupby(by=['game_id']).sum()
+#     df_o['points_scored'] = 0
+#     df_d['points_allowed'] = 0
+
+#     df_d = defense[data_sum_def].groupby(by=['game_id']).sum()
+#     df_d = df_d.rename(columns = {'interception':'interceptions_gained','fumble_lost':'fumble_gained','epa':'epa_allowed','passing_yards':'passing_yards_allowed','rushing_yards':'rushing_yards_allowed','receiving_yards':'receiving_yards_allowed'} )
 
 
+#     for GID in df_o.index:
 
-
-    at_df = pd.concat([df_o,df_d],axis=1)
-
-    at_df['season']=None
-
-    for i in range(len(at_df)):
-        if at_df.iloc[i].name[0:4] == '2023':
-            at_df['season'].iloc[i] = 2023
-        else: 
-            at_df['season'].iloc[i] = 2024
-
-    elo_temp_away_2023 = pd.Series(list(team_ref_2023.loc[away_team_input,'elo']))
-    elo_temp_away_2024 = pd.Series(list(team_ref_2023.loc[away_team_input,'elo']))
-
-    at_df['elo']=None
-
-    counter=0
-    for i in range(len(at_df[at_df['season'] == 2023])):
-        if i < (len(elo_temp_away_2023)-1):
-            at_df.loc[ at_df[at_df.season == 2023].index[i],'elo'] = elo_temp_away_2023[i]
-        else: 
-            at_df.loc[ at_df[at_df.season == 2023].index[i],'elo'] = team_ref_2023.loc[away_team_input,'Current ELO'] + counter*20
-            counter+=1
+#         df_o.loc[GID,'score_differential'] = off[off['game_id'] == GID].score_differential.iloc[len(off[off.index == GID])-1]
+#         if all(off.loc[off.game_id == GID,'home_team'] == away_abbr):
+#             df_o.loc[GID,'points_scored'] = max(off.loc[off.game_id == GID,'total_home_score'].dropna())
+#             df_d.loc[GID,'points_allowed'] = max(off.loc[off.game_id == GID,'total_away_score'].dropna())
+#             df_o.loc[GID,'home_away'] = 1
+#         else:
+#             df_d.loc[GID,'points_allowed'] = max(off.loc[off.game_id == GID,'total_home_score'].dropna())
+#             df_o.loc[GID,'points_scored'] = max(off.loc[off.game_id == GID,'total_away_score'].dropna())
+#             df_o.loc[GID,'home_away'] = 0
 
 
 
-    for i in range(len(at_df[at_df['season'] == 2024])):
-        try:at_df.loc[ at_df[at_df.season == 2024].index[i],'elo'] = elo_temp_away_2024[i]
-        except: at_df.loc[ at_df[at_df.season == 2024].index[i],'elo'] = team_ref_2024.loc[away_team_input,'Current ELO']
+
+#     at_df = pd.concat([df_o,df_d],axis=1)
+
+#     at_df['season']=None
+
+#     for i in range(len(at_df)):
+#         if at_df.iloc[i].name[0:4] == '2023':
+#             at_df['season'].iloc[i] = 2023
+#         else: 
+#             at_df['season'].iloc[i] = 2024
+
+#     elo_temp_away_2023 = pd.Series(list(team_ref_2023.loc[away_team_input,'elo']))
+#     elo_temp_away_2024 = pd.Series(list(team_ref_2023.loc[away_team_input,'elo']))
+
+#     at_df['elo']=None
+
+#     counter=0
+#     for i in range(len(at_df[at_df['season'] == 2023])):
+#         if i < (len(elo_temp_away_2023)-1):
+#             at_df.loc[ at_df[at_df.season == 2023].index[i],'elo'] = elo_temp_away_2023[i]
+#         else: 
+#             at_df.loc[ at_df[at_df.season == 2023].index[i],'elo'] = team_ref_2023.loc[away_team_input,'Current ELO'] + counter*20
+#             counter+=1
+
+
+
+#     for i in range(len(at_df[at_df['season'] == 2024])):
+#         try:at_df.loc[ at_df[at_df.season == 2024].index[i],'elo'] = elo_temp_away_2024[i]
+#         except: at_df.loc[ at_df[at_df.season == 2024].index[i],'elo'] = team_ref_2024.loc[away_team_input,'Current ELO']
 
 
 
@@ -492,15 +628,13 @@ for game in range(len(s)):
         
         
         
-    at_df.elo = at_df.elo.astype('float')
-    ht_df.elo = ht_df.elo.astype('float')  
+#     at_df.elo = at_df.elo.astype('float')
+#     ht_df.elo = ht_df.elo.astype('float')  
 
-    ht_df['turnovers'] = ht_df.fumble_lost + ht_df.interception
-    at_df['turnovers'] = at_df.fumble_lost + at_df.interception
-    ht_df['takeaways'] = ht_df.fumble_gained + ht_df.interceptions_gained
-    at_df['takeaways'] = at_df.fumble_gained + at_df.interceptions_gained
-
-
+#     ht_df['turnovers'] = ht_df.fumble_lost + ht_df.interception
+#     at_df['turnovers'] = at_df.fumble_lost + at_df.interception
+#     ht_df['takeaways'] = ht_df.fumble_gained + ht_df.interceptions_gained
+#     at_df['takeaways'] = at_df.fumble_gained + at_df.interceptions_gained
 
 
 
@@ -510,52 +644,54 @@ for game in range(len(s)):
 
 
 
-    ################## home #####################
-    #feature = ['epa', 'epa_allowed', 'passing_yards', 'rushing_yards', 'turnovers', 'takeaways','home_away', 'elo','weights']
-    predictors = ['epa', 'epa_allowed', 'passing_yards', 'rushing_yards', 'turnovers', 'takeaways','home_away', 'elo']
-    y = ht_df['points_scored']
-    weights = np.ones(len(ht_df))
-    for i in range(len(weights)-1):
-        weights[i+1] = weights[i] + .25
+
+
+#     ################## home #####################
+#     #feature = ['epa', 'epa_allowed', 'passing_yards', 'rushing_yards', 'turnovers', 'takeaways','home_away', 'elo','weights']
+#     predictors = ['epa', 'epa_allowed', 'passing_yards', 'rushing_yards', 'turnovers', 'takeaways','home_away', 'elo']
+#     y = ht_df['points_scored']
+#     weights = np.ones(len(ht_df))
+#     for i in range(len(weights)-1):
+#         weights[i+1] = weights[i] + .25
     
-    # ht_df['weights'] = weights        
+#     # ht_df['weights'] = weights        
 
 
 
-    # X, y = ht_df[predictors],  ht_df[['points_scored','weights']]
+#     # X, y = ht_df[predictors],  ht_df[['points_scored','weights']]
 
 
 
-    # params = {"objective": "reg:absoluteerror", "tree_method": "gpu_hist"}
-    # # Create regression matrices
-    # dtrain_reg = xgb.DMatrix(X[predictors], y['points_scored'],weight =y['weights'] )
-    # #dtest_reg =xgb.DMatrix(X_test[predictors], y_test['points_scored'],weight =y_test['weights'] )
+#     # params = {"objective": "reg:absoluteerror", "tree_method": "gpu_hist"}
+#     # # Create regression matrices
+#     # dtrain_reg = xgb.DMatrix(X[predictors], y['points_scored'],weight =y['weights'] )
+#     # #dtest_reg =xgb.DMatrix(X_test[predictors], y_test['points_scored'],weight =y_test['weights'] )
     
-    # n = 50
-    # model_home = xgb.train(
-    # params=params,
-    # dtrain=dtrain_reg,
-    # num_boost_round=n,
-    # verbose_eval=25
-    # )
+#     # n = 50
+#     # model_home = xgb.train(
+#     # params=params,
+#     # dtrain=dtrain_reg,
+#     # num_boost_round=n,
+#     # verbose_eval=25
+#     # )
   
     
-    model_home = LinearRegression().fit(ht_df[predictors],y,sample_weight=weights)
+#     model_home = LinearRegression().fit(ht_df[predictors],y,sample_weight=weights)
 
 
-    exp_epa = (stats.median(ht_df[len(ht_df)-10:len(ht_df)].epa) + stats.median(at_df[len(at_df)-10:len(at_df)].epa_allowed))/2
-    exp_epa_allowed = (stats.median(ht_df[len(ht_df)-10:len(ht_df)].epa_allowed) + stats.median(at_df[len(at_df)-10:len(at_df)].epa))/2
-    exp_passing_yards = (stats.median(ht_df[len(ht_df)-10:len(ht_df)].passing_yards) + stats.median(at_df[len(at_df)-10:len(at_df)].passing_yards_allowed))/2
-    exp_rushing_yards = (stats.median(ht_df[len(ht_df)-10:len(ht_df)].rushing_yards) + stats.median(at_df[len(at_df)-10:len(at_df)].rushing_yards_allowed))/2
-    exp_turnovers = (stats.mean(ht_df[len(ht_df)-10:len(ht_df)].turnovers) + stats.mean(at_df[len(at_df)-10:len(at_df)].takeaways))/2
-    exp_takeaways = (stats.mean(ht_df[len(ht_df)-10:len(ht_df)].takeaways) + stats.mean(at_df[len(at_df)-10:len(at_df)].turnovers))/2
+#     exp_epa = (stats.median(ht_df[len(ht_df)-10:len(ht_df)].epa) + stats.median(at_df[len(at_df)-10:len(at_df)].epa_allowed))/2
+#     exp_epa_allowed = (stats.median(ht_df[len(ht_df)-10:len(ht_df)].epa_allowed) + stats.median(at_df[len(at_df)-10:len(at_df)].epa))/2
+#     exp_passing_yards = (stats.median(ht_df[len(ht_df)-10:len(ht_df)].passing_yards) + stats.median(at_df[len(at_df)-10:len(at_df)].passing_yards_allowed))/2
+#     exp_rushing_yards = (stats.median(ht_df[len(ht_df)-10:len(ht_df)].rushing_yards) + stats.median(at_df[len(at_df)-10:len(at_df)].rushing_yards_allowed))/2
+#     exp_turnovers = (stats.mean(ht_df[len(ht_df)-10:len(ht_df)].turnovers) + stats.mean(at_df[len(at_df)-10:len(at_df)].takeaways))/2
+#     exp_takeaways = (stats.mean(ht_df[len(ht_df)-10:len(ht_df)].takeaways) + stats.mean(at_df[len(at_df)-10:len(at_df)].turnovers))/2
 
-    home_score_proj = model_home.predict(np.array([[exp_epa,exp_epa_allowed,exp_passing_yards,
-                                                    exp_rushing_yards,exp_turnovers,
-                                                    exp_takeaways,1, team_ref_2024.loc[home_team_input,'Current ELO']]]))[0]
-    #obj  = pd.DataFrame({'epa':exp_epa, 'epa_allowed':exp_epa_allowed, 'passing_yards':exp_passing_yards, 'rushing_yards':exp_rushing_yards, 'turnovers':exp_turnovers, 'takeaways':exp_takeaways,'home_away':[1], 'elo':team_ref_2022.loc[home_team_input,'Current ELO']})
+#     home_score_proj = model_home.predict(np.array([[exp_epa,exp_epa_allowed,exp_passing_yards,
+#                                                     exp_rushing_yards,exp_turnovers,
+#                                                     exp_takeaways,1, team_ref_2024.loc[home_team_input,'Current ELO']]]))[0]
+#     #obj  = pd.DataFrame({'epa':exp_epa, 'epa_allowed':exp_epa_allowed, 'passing_yards':exp_passing_yards, 'rushing_yards':exp_rushing_yards, 'turnovers':exp_turnovers, 'takeaways':exp_takeaways,'home_away':[1], 'elo':team_ref_2022.loc[home_team_input,'Current ELO']})
     
-    #home_score_proj = model_home.predict(xgb.DMatrix(obj))[0]
+#     #home_score_proj = model_home.predict(xgb.DMatrix(obj))[0]
     
     
 
@@ -564,56 +700,56 @@ for game in range(len(s)):
 
 
 
-    ################## away #####################
+#     ################## away #####################
 
 
-    predictors = ['epa', 'epa_allowed', 'passing_yards', 'rushing_yards', 'turnovers', 'takeaways','home_away', 'elo']
-    y = at_df['points_scored']
-    weights = np.ones(len(at_df))
-    for i in range(len(weights)-1):
-        weights[i+1] = weights[i] + .5
-    model_away = LinearRegression().fit(at_df[predictors],y, sample_weight=weights)
-    #at_df['weights'] = weights         
-    #model_home = LinearRegression().fit(ht_df[predictors],y,sample_weight=weights)
+#     predictors = ['epa', 'epa_allowed', 'passing_yards', 'rushing_yards', 'turnovers', 'takeaways','home_away', 'elo']
+#     y = at_df['points_scored']
+#     weights = np.ones(len(at_df))
+#     for i in range(len(weights)-1):
+#         weights[i+1] = weights[i] + .5
+#     model_away = LinearRegression().fit(at_df[predictors],y, sample_weight=weights)
+#     #at_df['weights'] = weights         
+#     #model_home = LinearRegression().fit(ht_df[predictors],y,sample_weight=weights)
 
 
-    exp_epa = (stats.median(at_df[len(at_df)-10:len(at_df)].epa) + stats.median(ht_df[len(ht_df)-10:len(ht_df)].epa_allowed))/2
-    exp_epa_allowed = (stats.median(at_df[len(at_df)-10:len(at_df)].epa_allowed) + stats.median(ht_df[len(ht_df)-10:len(ht_df)].epa))/2
-    exp_passing_yards = (stats.median(at_df[len(at_df)-10:len(at_df)].passing_yards) + stats.median(ht_df[len(ht_df)-10:len(ht_df)].passing_yards_allowed))/2
-    exp_rushing_yards = (stats.median(at_df[len(at_df)-10:len(at_df)].rushing_yards) + stats.median(ht_df[len(ht_df)-10:len(ht_df)].rushing_yards_allowed))/2
-    exp_turnovers = (stats.mean(at_df[len(at_df)-10:len(at_df)].turnovers) + stats.mean(ht_df[len(ht_df)-10:len(ht_df)].takeaways))/2
-    exp_takeaways = (stats.mean(at_df[len(at_df)-10:len(at_df)].takeaways) + stats.mean(ht_df[len(ht_df)-10:len(ht_df)].turnovers))/2
+#     exp_epa = (stats.median(at_df[len(at_df)-10:len(at_df)].epa) + stats.median(ht_df[len(ht_df)-10:len(ht_df)].epa_allowed))/2
+#     exp_epa_allowed = (stats.median(at_df[len(at_df)-10:len(at_df)].epa_allowed) + stats.median(ht_df[len(ht_df)-10:len(ht_df)].epa))/2
+#     exp_passing_yards = (stats.median(at_df[len(at_df)-10:len(at_df)].passing_yards) + stats.median(ht_df[len(ht_df)-10:len(ht_df)].passing_yards_allowed))/2
+#     exp_rushing_yards = (stats.median(at_df[len(at_df)-10:len(at_df)].rushing_yards) + stats.median(ht_df[len(ht_df)-10:len(ht_df)].rushing_yards_allowed))/2
+#     exp_turnovers = (stats.mean(at_df[len(at_df)-10:len(at_df)].turnovers) + stats.mean(ht_df[len(ht_df)-10:len(ht_df)].takeaways))/2
+#     exp_takeaways = (stats.mean(at_df[len(at_df)-10:len(at_df)].takeaways) + stats.mean(ht_df[len(ht_df)-10:len(ht_df)].turnovers))/2
 
 
-    away_score_proj = model_away.predict(np.array([[exp_epa,exp_epa_allowed,exp_passing_yards,exp_rushing_yards,exp_turnovers,exp_takeaways,0, team_ref_2024.loc[away_team_input,'Current ELO']]]))[0]
+#     away_score_proj = model_away.predict(np.array([[exp_epa,exp_epa_allowed,exp_passing_yards,exp_rushing_yards,exp_turnovers,exp_takeaways,0, team_ref_2024.loc[away_team_input,'Current ELO']]]))[0]
 
-    #obj  = pd.DataFrame({'epa':exp_epa, 'epa_allowed':exp_epa_allowed, 'passing_yards':exp_passing_yards, 'rushing_yards':exp_rushing_yards, 'turnovers':exp_turnovers, 'takeaways':exp_takeaways,'home_away':[0], 'elo':team_ref_2022.loc[away_team_input,'Current ELO']})
+#     #obj  = pd.DataFrame({'epa':exp_epa, 'epa_allowed':exp_epa_allowed, 'passing_yards':exp_passing_yards, 'rushing_yards':exp_rushing_yards, 'turnovers':exp_turnovers, 'takeaways':exp_takeaways,'home_away':[0], 'elo':team_ref_2022.loc[away_team_input,'Current ELO']})
     
-    #away_score_proj = model_away.predict(xgb.DMatrix(obj))[0]
+#     #away_score_proj = model_away.predict(xgb.DMatrix(obj))[0]
 
     
-    # exp_epa = (stats.median(at_df[len(at_df)-10:len(at_df)].epa) + stats.median(ht_df[len(ht_df)-10:len(ht_df)].epa_allowed))/2
-    # exp_epa_allowed = (stats.median(at_df[len(at_df)-10:len(at_df)].epa_allowed) + stats.median(ht_df[len(ht_df)-10:len(ht_df)].epa))/2
-    # exp_passing_yards = (stats.median(at_df[len(at_df)-10:len(at_df)].passing_yards) + stats.median(ht_df[len(ht_df)-10:len(ht_df)].passing_yards_allowed))/2
-    # exp_rushing_yards = (stats.median(at_df[len(at_df)-10:len(at_df)].rushing_yards) + stats.median(ht_df[len(ht_df)-10:len(ht_df)].rushing_yards_allowed))/2
-    # exp_turnovers = (stats.mean(at_df[len(at_df)-10:len(at_df)].turnovers) + stats.mean(ht_df[len(ht_df)-10:len(ht_df)].takeaways))/2
-    # exp_takeaways = (stats.mean(at_df[len(at_df)-10:len(at_df)].takeaways) + stats.mean(ht_df[len(ht_df)-10:len(ht_df)].turnovers))/2
+#     # exp_epa = (stats.median(at_df[len(at_df)-10:len(at_df)].epa) + stats.median(ht_df[len(ht_df)-10:len(ht_df)].epa_allowed))/2
+#     # exp_epa_allowed = (stats.median(at_df[len(at_df)-10:len(at_df)].epa_allowed) + stats.median(ht_df[len(ht_df)-10:len(ht_df)].epa))/2
+#     # exp_passing_yards = (stats.median(at_df[len(at_df)-10:len(at_df)].passing_yards) + stats.median(ht_df[len(ht_df)-10:len(ht_df)].passing_yards_allowed))/2
+#     # exp_rushing_yards = (stats.median(at_df[len(at_df)-10:len(at_df)].rushing_yards) + stats.median(ht_df[len(ht_df)-10:len(ht_df)].rushing_yards_allowed))/2
+#     # exp_turnovers = (stats.mean(at_df[len(at_df)-10:len(at_df)].turnovers) + stats.mean(ht_df[len(ht_df)-10:len(ht_df)].takeaways))/2
+#     # exp_takeaways = (stats.mean(at_df[len(at_df)-10:len(at_df)].takeaways) + stats.mean(ht_df[len(ht_df)-10:len(ht_df)].turnovers))/2
 
 
 
 
 
-    df.loc[s['game_id'].iloc[game],'Home_Team'] = f"{s['home_team'].iloc[game]}"
-    df.loc[s['game_id'].iloc[game],'Away_Team'] = f"{s['away_team'].iloc[game]}"
-    df.loc[s['game_id'].iloc[game],'Home_Score'] = home_score_proj
-    df.loc[s['game_id'].iloc[game],'Away_Score'] = away_score_proj
-    df.loc[s['game_id'].iloc[game],'Spread'] = home_score_proj- away_score_proj
-    df.loc[s['game_id'].iloc[game],'Total'] = home_score_proj + away_score_proj
+#     df.loc[s['game_id'].iloc[game],'Home_Team'] = f"{s['home_team'].iloc[game]}"
+#     df.loc[s['game_id'].iloc[game],'Away_Team'] = f"{s['away_team'].iloc[game]}"
+#     df.loc[s['game_id'].iloc[game],'Home_Score'] = home_score_proj
+#     df.loc[s['game_id'].iloc[game],'Away_Score'] = away_score_proj
+#     df.loc[s['game_id'].iloc[game],'Spread'] = home_score_proj- away_score_proj
+#     df.loc[s['game_id'].iloc[game],'Total'] = home_score_proj + away_score_proj
 
 
 
-    print(f"{home_team_input}: {np.mean(home_score_proj)}")
-    print(f"{away_team_input}: {np.mean(away_score_proj)}")
+#     print(f"{home_team_input}: {np.mean(home_score_proj)}")
+#     print(f"{away_team_input}: {np.mean(away_score_proj)}")
 
 
 
@@ -621,7 +757,7 @@ for game in range(len(s)):
 
 
 
-df
+# df
 
 
 
