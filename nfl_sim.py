@@ -1,4 +1,6 @@
 
+import os
+os.chdir(r'C:\Users\harri\Documents\Statletics\NFL_Analytics\NFL_Analytics')
 from Class_Statlete import Statlete
 import numpy as np 
 import pandas as pd
@@ -32,9 +34,9 @@ class Team:
         
         
     class Season:       
-        ID = nfl.load_nfl_players()
-        stats = nfl.load_nfl_player_stats()
-        ngs = nfl.load_nfl_ngs_receiving() 
+        ID = nfl.load_nfl_players(return_as_pandas=True)
+        stats = nfl.load_nfl_player_stats(return_as_pandas=True)
+        ngs = nfl.load_nfl_ngs_receiving(return_as_pandas=True) 
         
         def __init__(self, team):
             teams_info = pd.read_csv('teams_info.csv')
@@ -44,7 +46,7 @@ class Team:
             #self.player_ngs = player_ngs 
 
         def get_data(self, season = [2019,2022]):
-            pbp = nfl.load_nfl_pbp(seasons=(season))
+            pbp = nfl.load_nfl_pbp(seasons=(season),return_as_pandas=True)
             team_pbp = pbp[(pbp.home_team.isin(self.team_abr_season)) | (pbp.away_team.isin(self.team_abr_season))]
             team_off_pbp = team_pbp[(team_pbp.posteam.isin(self.team_abr_season)) | (team_pbp.defteam.isin(self.team_abr_season)) ]
             
