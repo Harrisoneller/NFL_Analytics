@@ -40,9 +40,9 @@ class Team:
         
         
     class Season:       
-        ID = nfl.load_nfl_players()
-        stats = nfl.load_nfl_player_stats()
-        ngs = nfl.load_nfl_ngs_receiving() 
+        ID = nfl.load_nfl_players(return_as_pandas=True)
+        stats = nfl.load_nfl_player_stats(return_as_pandas=True)
+        ngs = nfl.load_nfl_ngs_receiving(return_as_pandas=True) 
         
         def __init__(self, team):
             teams_info = pd.read_csv('teams_info.csv')
@@ -51,7 +51,7 @@ class Team:
             self.team_abr_season = teams_info.team_abbr[teams_info.team_name.isin(team)]
             #self.player_ngs = player_ngs 
 
-        def get_data(self, season = [2022,2023],data = False):
+        def get_data(self, season = [2023,2024],data = False):
             if data is not False:
                 print("data received")
                 pbp = data
@@ -69,6 +69,7 @@ class Team:
             return df
   
     
+
 def get_current_elo(input_season):
     
     # Data source we are going to scrape for results
@@ -125,48 +126,16 @@ def get_current_elo(input_season):
 
     # This is a team level dataframe
     # I append winners to losers to get all possible teams
-    team_ref = pd.DataFrame(season['winner'].append(season['loser']),columns=['team']).drop_duplicates().set_index(['team']).sort_index()
+    #team_ref = pd.DataFrame(season['winner'].append(season['loser']),columns=['team']).drop_duplicates().set_index(['team']).sort_index()
+    team_ref = pd.DataFrame(pd.concat([season['winner'],season['loser']]),columns=['team']).drop_duplicates().set_index(['team']).sort_index()
 
     #initialize vars
 
 
     # Typed these values in from 538.com
     # teams in alphabetical order
-    if input_season == 2022:
-      elo_list = [
-      [    1501], #Arizona Cardinals
-      [    1437], #Atlanta Falcons
-      [    1509], #Baltimore Ravens
-      [    1614], #Buffalo Bills
-      [    1411], #Carolina Panthers
-      [    1445], #Chicago Bears
-      [    1558], #Cincinatti Bengals
-      [    1502], #Cleveland Browns
-      [    1562], #Dallas Cowboys
-      [    1447], #Denver Broncos
-      [    1406], #Detroit Lions
-      [    1589], #Green Bay 
-      [    1410], #Houston Texans
-      [    1543], #Indianapolis Colts
-      [    1351], #Jax Jaguars
-      [    1629], #KC Chiefs
-      [    1493], #LV Raiders
-      [    1506], #LA Chargers
-      [    1615], #LA Rams
-      [    1540], #Miami Dolphins
-      [    1514], #Minn Vikings
-      [    1537], #NE Patriots
-      [    1544], #NO Saints
-      [    1389], #NY Giants
-      [    1365], #NY Jets
-      [    1502], #Philly Eagles
-      [    1510], #Pitt Steelers
-      [    1576], #49ers
-      [    1527], #Seahawks
-      [    1610], #TB Buccaneers 
-      [    1556], #Tenn Titans 
-      [    1465]] #WSH Commanders
-    else:
+    if input_season == 2023:
+
       elo_list = [
       [    1320], #Arizona Cardinals
       [    1480], #Atlanta Falcons
@@ -199,7 +168,41 @@ def get_current_elo(input_season):
       [    1550], #Seahawks
       [    1440], #TB Buccaneers 
       [    1450], #Tenn Titans 
-      [    1465]] #WSH Commanders
+      [    1465]] #WSH Commanders      
+    else:
+      elo_list = [
+      [    1475], #Arizona Cardinals
+      [    1500], #Atlanta Falcons
+      [    1750], #Baltimore Ravens
+      [    1725], #Buffalo Bills
+      [    1315], #Carolina Panthers
+      [    1439], #Chicago Bears
+      [    1614], #Cincinatti Bengals
+      [    1520], #Cleveland Browns
+      [    1621], #Dallas Cowboys
+      [    1481], #Denver Broncos
+      [    1700], #Detroit Lions
+      [    1560], #Green Bay 
+      [    1580], #Houston Texans
+      [    1500], #Indianapolis Colts
+      [    1510], #Jax Jaguars
+      [    1742], #KC Chiefs
+      [    1415], #LV Raiders
+      [    1440], #LA Chargers
+      [    1516], #LA Rams
+      [    1590], #Miami Dolphins
+      [    1420], #Minn Vikings
+      [    1370], #NE Patriots
+      [    1440], #NO Saints
+      [    1425], #NY Giants
+      [    1510], #NY Jets
+      [    1615], #Philly Eagles
+      [    1450], #Pitt Steelers
+      [    1720], #49ers
+      [    1550], #Seahawks
+      [    1500], #TB Buccaneers 
+      [    1400], #Tenn Titans 
+      [    1400]] #WSH Commanders
 
 
     team_ref['elo'] = elo_list
@@ -294,12 +297,13 @@ def get_current_elo(input_season):
     return team_ref['Current ELO'],team_ref
 
 
-out_elo, team_ref_2022= get_current_elo(input_season=2022)
-team_ref_2022['season']=None
-team_ref_2022['season']=2022
+
 out_elo, team_ref_2023= get_current_elo(input_season=2023)
 team_ref_2023['season']=None
 team_ref_2023['season']=2023
+out_elo, team_ref_2024= get_current_elo(input_season=2024)
+team_ref_2024['season']=None
+team_ref_2024['season']=2024
 
 
 
@@ -307,7 +311,7 @@ team_ref_2023['season']=2023
 
 
 
-s = nfl.nfl_games.nfl_game_schedule(season = 2023,week=17)
+s = nfl.nfl_games.nfl_game_schedule(season = 2024,week=1)
 s['games']
 gid = [] 
 for game in range(len(s['games'])):

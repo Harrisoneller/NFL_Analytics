@@ -442,7 +442,7 @@ table <-
 ### Add title and subtitle to top of page above table
 div(class = "team-ratings",
     div(class = "title",
-        h2("2023 NFL Team Ratings & Projections (Week 12)"),
+        h2("2023 NFL Team Ratings & Projections (Week 17)"),
         "Ratings and predictions for the 2023 NFL season"),
   table,
   ### Add legend and source below the table

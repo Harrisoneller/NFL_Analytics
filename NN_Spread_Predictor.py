@@ -12,7 +12,7 @@ def NFL_NN_SPREAD_PREDICTOR(home_team_input,away_team_input):
     import tensorflow as tf 
     import keras
     from sklearn.model_selection import train_test_split
-    import elo_scrape as elo_funs
+    #import elo_scrape as elo_funs
 
 
     class Team:
@@ -36,9 +36,9 @@ def NFL_NN_SPREAD_PREDICTOR(home_team_input,away_team_input):
             
             
         class Season:       
-            ID = nfl.load_nfl_players()
-            stats = nfl.load_nfl_player_stats()
-            ngs = nfl.load_nfl_ngs_receiving() 
+            ID = nfl.load_nfl_players(return_as_pandas=True)
+            stats = nfl.load_nfl_player_stats(return_as_pandas=True)
+            ngs = nfl.load_nfl_ngs_receiving(return_as_pandas=True) 
             
             def __init__(self, team):
                 teams_info = pd.read_csv('teams_info.csv')
@@ -48,7 +48,7 @@ def NFL_NN_SPREAD_PREDICTOR(home_team_input,away_team_input):
                 #self.player_ngs = player_ngs 
 
             def get_data(self, season = [2021,2022]):
-                pbp = nfl.load_nfl_pbp(seasons=(season))
+                pbp = nfl.load_nfl_pbp(seasons=(season),return_as_pandas=True)
                 team_pbp = pbp[(pbp.home_team.isin(self.team_abr_season)) | (pbp.away_team.isin(self.team_abr_season))]
                 team_off_pbp = team_pbp[(team_pbp.posteam.isin(self.team_abr_season)) | (team_pbp.defteam.isin(self.team_abr_season)) ]
                 
@@ -58,7 +58,7 @@ def NFL_NN_SPREAD_PREDICTOR(home_team_input,away_team_input):
                     df = team_off_pbp
                 except:
                     df = team_off_pbp
-                return df
+                return df, self.team_abr_season
             
     hist_elo = pd.read_csv('nfl_historical_elo.csv')
     hist_elo = hist_elo[hist_elo.season > 2020]
@@ -66,28 +66,41 @@ def NFL_NN_SPREAD_PREDICTOR(home_team_input,away_team_input):
     # ############################################################### data preparation
     TEAM = Team(f'{home_team_input}')
     try:
-        dfh = Team.Season(f'{home_team_input}').get_data()
+        dfh, team_abr = Team.Season(f'{home_team_input}').get_data()
     except:
         try:
-            dfh = Team.Season(f'{home_team_input}').get_data()
+            dfh, team_abr = Team.Season(f'{home_team_input}').get_data()
         except:
             try:
-                dfh = Team.Season(f'{home_team_input}').get_data()
+                dfh, team_abr = Team.Season(f'{home_team_input}').get_data()
             except:
                 try:
-                    dfh = Team.Season(f'{home_team_input}').get_data()
+                    dfh, team_abr = Team.Season(f'{home_team_input}').get_data()
                 except:         
                     try:
-                        dfh = Team.Season(f'{home_team_input}').get_data()
+                        dfh, team_abr = Team.Season(f'{home_team_input}').get_data()
                     except:              
                         try:
-                            dfh = Team.Season(f'{home_team_input}').get_data()
+                            dfh, team_abr = Team.Season(f'{home_team_input}').get_data()
                         except:             
                             try:
-                                dfh = Team.Season(f'{home_team_input}').get_data()
+                                dfh, team_abr = Team.Season(f'{home_team_input}').get_data()
                             except:   
                                 pass                                                        
-    df_numeric = dfh.groupby(by=['game_id']).mean()
+    
+    df_numeric = dfh.groupby(by=['game_id']).mean(numeric_only=True)
+    df_numeric['win_loss']=0
+
+    for id in dfh.game_id.unique():
+        home_score = dfh.loc[dfh.game_id == id, 'total_home_score'].iloc[len(dfh.loc[dfh.game_id == id, 'total_home_score'])-1]
+        away_score = dfh.loc[dfh.game_id == id, 'total_away_score'].iloc[len(dfh.loc[dfh.game_id == id, 'total_away_score'])-1]
+        
+        if (team_abr.iloc[0] == dfh.loc[dfh.game_id == id, 'home_team'].iloc[0]) and (home_score > away_score): 
+            df_numeric.loc[id, 'win_loss'] = 1
+        elif (team_abr.iloc[0] != dfh.loc[dfh.game_id == id, 'home_team'].iloc[0]) and (away_score > home_score): 
+            df_numeric.loc[id, 'win_loss'] = 1
+
+
     df_numeric['opp_passing_yards'] = 0
     df_numeric['opp_rushing_yards'] = 0
     df_numeric['OSR'] = 0
@@ -191,7 +204,7 @@ def NFL_NN_SPREAD_PREDICTOR(home_team_input,away_team_input):
         
         
     predictors = ['air_yards','epa','pass_oe','passing_yards','rushing_yards','total_epa','opp_epa','home_field','opp_passing_yards','opp_rushing_yards','OSR','DSR','opp_OSR','opp_DSR','elo','opp_elo']
-    ht = df_numeric[['air_yards','score_diff','epa','pass_oe','passing_yards','rushing_yards','total_epa','opp_epa','home_field','opp_passing_yards','opp_rushing_yards','OSR','DSR','opp_OSR','opp_DSR','elo','opp_elo']]
+    ht = df_numeric[['air_yards','win_loss','epa','pass_oe','passing_yards','rushing_yards','total_epa','opp_epa','home_field','opp_passing_yards','opp_rushing_yards','OSR','DSR','opp_OSR','opp_DSR','elo','opp_elo']]
 
 
 
@@ -232,9 +245,9 @@ def NFL_NN_SPREAD_PREDICTOR(home_team_input,away_team_input):
         #xtrain.reshape(xtrain.shape[0],xtrain.shape[1],1)
         #xtest.reshape(xtest.shape[0],xtest.shape[1],1)
 
-        y_train_home = ht['score_diff'][0:int(n*0.8)]
+        y_train_home = ht['win_loss'][0:int(n*0.8)]
         #y_test = ht['score_diff'][int(n*0.7):int(n*0.9)]
-        y_val_home = ht['score_diff'][int(n*0.8):]
+        y_val_home = ht['win_loss'][int(n*0.8):]
 
         #ytrain = np.array(y_train)
         #ytest = np.array(y_test)
@@ -352,28 +365,42 @@ def NFL_NN_SPREAD_PREDICTOR(home_team_input,away_team_input):
     # ############################################################### data preparation
     OPP = Team(f'{away_team_input}')
     try:
-        dfa = Team.Season(f'{away_team_input}').get_data()
+        dfa, team_abr = Team.Season(f'{away_team_input}').get_data()
     except:
         try:
-            dfa = Team.Season(f'{away_team_input}').get_data()
+            dfa, team_abr = Team.Season(f'{away_team_input}').get_data()
         except:
             try:
-                dfa = Team.Season(f'{away_team_input}').get_data()
+                dfa , team_abr= Team.Season(f'{away_team_input}').get_data()
             except:
                 try:
-                    dfa = Team.Season(f'{away_team_input}').get_data()
+                    dfa , team_abr= Team.Season(f'{away_team_input}').get_data()
                 except:         
                     try:
-                        dfa = Team.Season(f'{away_team_input}').get_data()
+                        dfa, team_abr = Team.Season(f'{away_team_input}').get_data()
                     except:              
                         try:
-                            dfa = Team.Season(f'{away_team_input}').get_data()
+                            dfa, team_abr = Team.Season(f'{away_team_input}').get_data()
                         except:             
                             try:
-                                dfa = Team.Season(f'{away_team_input}').get_data()
+                                dfa , team_abr= Team.Season(f'{away_team_input}').get_data()
                             except:   
                                 pass    
-    df2_numeric = dfa.groupby(by=['game_id']).mean()
+
+    df2_numeric = dfa.groupby(by=['game_id']).mean(numeric_only=True)
+
+    df2_numeric['win_loss']=0
+
+    for id in dfa.game_id.unique():
+        home_score = dfa.loc[dfa.game_id == id, 'total_home_score'].iloc[len(dfa.loc[dfa.game_id == id, 'total_home_score'])-1]
+        away_score = dfa.loc[dfa.game_id == id, 'total_away_score'].iloc[len(dfa.loc[dfa.game_id == id, 'total_away_score'])-1]
+        
+        if (team_abr.iloc[0] == dfa.loc[dfa.game_id == id, 'home_team'].iloc[0]) and (home_score > away_score): 
+            df2_numeric.loc[id, 'win_loss'] = 1
+        elif (team_abr.iloc[0] != dfa.loc[dfa.game_id == id, 'home_team'].iloc[0]) and (away_score > home_score): 
+            df2_numeric.loc[id, 'win_loss'] = 1
+
+
     df2_numeric['opp_passing_yards'] = 0
     df2_numeric['opp_rushing_yards'] = 0
     df2_numeric['OSR'] = 0
@@ -477,7 +504,7 @@ def NFL_NN_SPREAD_PREDICTOR(home_team_input,away_team_input):
         
         
     predictors2 = ['air_yards','epa','pass_oe','passing_yards','rushing_yards','total_epa','opp_epa','home_field','opp_passing_yards','opp_rushing_yards','OSR','DSR','opp_OSR','opp_DSR','elo','opp_elo']
-    at = df2_numeric[['air_yards','score_diff','epa','pass_oe','passing_yards','rushing_yards','total_epa','opp_epa','home_field','opp_passing_yards','opp_rushing_yards','OSR','DSR','opp_OSR','opp_DSR','elo','opp_elo']]
+    at = df2_numeric[['air_yards','win_loss','epa','pass_oe','passing_yards','rushing_yards','total_epa','opp_epa','home_field','opp_passing_yards','opp_rushing_yards','OSR','DSR','opp_OSR','opp_DSR','elo','opp_elo']]
 
 
 
@@ -514,9 +541,9 @@ def NFL_NN_SPREAD_PREDICTOR(home_team_input,away_team_input):
         #xtrain.reshape(xtrain.shape[0],xtrain.shape[1],1)
         #xtest.reshape(xtest.shape[0],xtest.shape[1],1)
 
-        y_train_away = at['score_diff'][0:int(n*0.8)]
+        y_train_away = at['win_loss'][0:int(n*0.8)]
         #y_test = ht['score_diff'][int(n*0.7):int(n*0.9)]
-        y_val_away = at['score_diff'][int(n*0.8):]
+        y_val_away = at['win_loss'][int(n*0.8):]
 
         #ytrain = np.array(y_train)
         #ytest = np.array(y_test)
@@ -620,22 +647,22 @@ def NFL_NN_SPREAD_PREDICTOR(home_team_input,away_team_input):
     yhat_away=[]
     for sim in range(0,10):
     ################# home ################ 
-        inputs = tf.keras.Input(shape=(len(X_train_home.columns)), name = 'input')
-        hidden1 = tf.keras.layers.Dense(units = 500, activation = 'ReLU', name = 'hidden1')(inputs)
-        hidden2 = tf.keras.layers.Dense(units = 200, activation = 'ReLU', name = 'hidden2')(hidden1)
+        inputs = tf.keras.Input(shape=X_train_home.shape[1], name = 'input')
+        hidden1 = tf.keras.layers.Dense(units = 500, activation = 'tanh', name = 'hidden1')(inputs)
+        hidden2 = tf.keras.layers.Dense(units = 200, activation = 'tanh', name = 'hidden2')(hidden1)
         dropout1 = tf.keras.layers.Dropout(rate = .2)(hidden2)
-        hidden3 = tf.keras.layers.Dense(units = 50, activation = 'ReLU', name = 'hidden3')(dropout1)
+        hidden3 = tf.keras.layers.Dense(units = 50, activation = 'tanh', name = 'hidden3')(dropout1)
         dropout2 = tf.keras.layers.Dropout(rate = .2)(hidden3)
-        hidden4 = tf.keras.layers.Dense(units = 15, activation = 'ReLU', name = 'hidden4')(dropout2)
+        hidden4 = tf.keras.layers.Dense(units = 15, activation = 'tanh', name = 'hidden4')(dropout2)
         dropout3 = tf.keras.layers.Dropout(rate = .2)(hidden4)
-        hidden5 = tf.keras.layers.Dense(units = 5, activation = 'ReLU', kernel_regularizer = tf.keras.regularizers.L1(.01), name = 'hidden5')(dropout3)
-        output = tf.keras.layers.Dense(units = 1, activation = 'linear', name = 'output')(hidden5)
+        hidden5 = tf.keras.layers.Dense(units = 5, activation = 'tanh', kernel_regularizer = tf.keras.regularizers.L1(.01), name = 'hidden5')(dropout3)
+        output = tf.keras.layers.Dense(units = 1, activation = 'sigmoid', name = 'output')(hidden5)
 
 
         #hp_learning_rate = hp.Choice("learning_rate", values=[1e-2, 1e-3, 1e-4])
         model = 0
         model = tf.keras.Model(inputs = inputs, outputs = output)
-        model.compile(loss = 'MAE', optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001))# metrics = ['mae'])
+        model.compile(loss = 'binary-crossentropy', optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001))# metrics = ['mae'])
         stop_early = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=33)
 
         history = model.fit(x = X_train_home,y=y_train_home, validation_data=(x_val_home, y_val_home),callbacks = [stop_early],  batch_size = 1, epochs = 100)
@@ -643,15 +670,15 @@ def NFL_NN_SPREAD_PREDICTOR(home_team_input,away_team_input):
         yhat_home.append(model.predict(PH))
         ############## away ##########
         inputs = tf.keras.Input(shape=(len(X_train_away.columns)), name = 'input')
-        hidden1 = tf.keras.layers.Dense(units = 500, activation = 'ReLU', name = 'hidden1')(inputs)
-        hidden2 = tf.keras.layers.Dense(units = 200, activation = 'ReLU', name = 'hidden2')(hidden1)
+        hidden1 = tf.keras.layers.Dense(units = 500, activation = 'tanh', name = 'hidden1')(inputs)
+        hidden2 = tf.keras.layers.Dense(units = 200, activation = 'tanh', name = 'hidden2')(hidden1)
         dropout1 = tf.keras.layers.Dropout(rate = .2)(hidden2)
-        hidden3 = tf.keras.layers.Dense(units = 50, activation = 'ReLU', name = 'hidden3')(dropout1)
+        hidden3 = tf.keras.layers.Dense(units = 50, activation = 'tanh', name = 'hidden3')(dropout1)
         dropout2 = tf.keras.layers.Dropout(rate = .2)(hidden3)
-        hidden4 = tf.keras.layers.Dense(units = 15, activation = 'ReLU', name = 'hidden4')(dropout2)
+        hidden4 = tf.keras.layers.Dense(units = 15, activation = 'tanh', name = 'hidden4')(dropout2)
         dropout3 = tf.keras.layers.Dropout(rate = .2)(hidden4)
-        hidden5 = tf.keras.layers.Dense(units = 5, activation = 'ReLU', kernel_regularizer = tf.keras.regularizers.L1(.01), name = 'hidden5')(dropout3)
-        output = tf.keras.layers.Dense(units = 1, activation = 'linear', name = 'output')(hidden5)
+        hidden5 = tf.keras.layers.Dense(units = 5, activation = 'tanh', kernel_regularizer = tf.keras.regularizers.L1(.01), name = 'hidden5')(dropout3)
+        output = tf.keras.layers.Dense(units = 1, activation = 'sigmoid', name = 'output')(hidden5)
 
 
 
