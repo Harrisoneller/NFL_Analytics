@@ -60,7 +60,7 @@ source('nfl_ypp_model.r')
 
 
 ```{r}
-week=2
+week=4
 
 ```
 
@@ -130,7 +130,7 @@ meansd <- function(x, ...) {
   c(mean - sd, mean, mean + sd)
 }
 
-pbp <- load_pbp(c(2023,2024))
+pbp <- load_pbp(c(2024))
 pbp<- clean_pbp(pbp)
 pbp <- add_qb_epa(pbp)
 factor(pbp$posteam)
@@ -255,7 +255,7 @@ for (j in 1:nrow(schedule)){
 
 
 ```{r}
-url <- "https://www.pro-football-reference.com/years/2023/"
+url <- "https://www.pro-football-reference.com/years/2024/"
 
 team_info<-teams_colors_logos
 ### Get AFC conference table from pro-football-reference site
@@ -361,7 +361,7 @@ NFL_table_clean <- schedule %>%
   )
 
 # show_data<-NFL_table_clean %>% 
-#   filter(Home == "Eagles")
+#    filter(Home == "Cowboys")
 ```
 
 
@@ -427,6 +427,7 @@ team_rating_column <- function(maxWidth = 75, ...) {
 table <-
     reactable(
       NFL_table_clean,
+      #show_data,
       pagination = FALSE,
       showSortIcon = FALSE,
       highlight = TRUE,

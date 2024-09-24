@@ -234,7 +234,7 @@ class nfl_model:
 
         ######################################################################################################################################################################################
         import nfl_data_py as nfl_data
-        week = 2
+        week = self.week
 
         s = nfl_data.import_schedules([2024])
         s = s.loc[s['week'] == week,]
@@ -366,7 +366,7 @@ class nfl_model:
 
     def projections(self,week,ypp_input=None):
         import nfl_data_py as nfl_dp
-        
+        self.week=week
         model,df = self.XGB()
         
         
