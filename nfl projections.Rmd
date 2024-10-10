@@ -60,7 +60,7 @@ source('nfl_ypp_model.r')
 
 
 ```{r}
-week=4
+week=6
 
 ```
 
@@ -79,7 +79,8 @@ from points_model import nfl_model
 import pandas as pd
 
 ypp_input = pd.DataFrame(r.data_mod)
-projections = nfl_model().projections(week=int(r.week),ypp_input = ypp_input)
+#projections = nfl_model().projections(week=int(r.week),ypp_input = ypp_input)
+projections = nfl_model().projections(week=int(r.week))
 r.projections = projections
 ```
 
@@ -360,6 +361,7 @@ NFL_table_clean <- schedule %>%
     
   )
 
+NFL_table_clean<-NFL_table_clean %>% filter(!is.na(Home_Proj))
 # show_data<-NFL_table_clean %>% 
 #    filter(Home == "Cowboys")
 ```
@@ -368,8 +370,8 @@ NFL_table_clean <- schedule %>%
 ```{r}
 ## -------------------- use for creating show previews -------------------- ##
 
-# show_data<-NFL_table_clean %>% 
-#   filter(Home == "Eagles")
+# show_data<-NFL_table_clean %>%
+#   filter(Home == "Falcons")
 
 ```
 
@@ -534,9 +536,9 @@ table <-
           # },
           ### For any positive number, assign green color. For any negative number assign red color
           style = function(value) {
-            if (value > mean( c(proj$away_score,proj$home_score) )) {
+            if (value > mean( c(proj$away_score,proj$home_score) ,na.rm = TRUE)) {
               color <- "#008000"
-            } else if (value < mean( c(proj$away_score,proj$home_score) )) {
+            } else if (value < mean( c(proj$away_score,proj$home_score) ,na.rm = TRUE)) {
               color <- "#e00000"
             } else {
               color <- "#777"
@@ -558,9 +560,9 @@ table <-
           # },
           ### For any positive number, assign green color. For any negative number assign red color
           style = function(value) {
-            if (value > mean( c(proj$away_score,proj$home_score) )) {
+            if (value > mean( c(proj$away_score,proj$home_score) ,na.rm = TRUE)) {
               color <- "#008000"
-            } else if (value < mean( c(proj$away_score,proj$home_score) )) {
+            } else if (value < mean( c(proj$away_score,proj$home_score),na.rm = TRUE )) {
               color <- "#e00000"
             } else {
               color <- "#777"

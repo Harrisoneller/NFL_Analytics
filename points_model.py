@@ -375,6 +375,7 @@ class nfl_model:
         s = s[s.week == week]
         projections = pd.DataFrame({'home':None,'home_score':None,'away_score':None,'away':None},index = s.game_id)
 
+        df = df[df[('season','median')] == 2024]
 
         
         for game in s.index:
