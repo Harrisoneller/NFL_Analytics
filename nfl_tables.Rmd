@@ -1,0 +1,877 @@
+---
+title: "nfl tables"
+author: "Harrison Eller"
+date: "2024-10-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(nflfastR)
+library(tidyverse)
+library(nflplotR)
+library(ggplot2)
+library(extrafont)
+library(ggrepel)
+library(ggimage)
+library(ggridges)
+library(ggtext)
+library(ggfx)
+library(geomtextpath)
+library(cropcircles)
+library(magick)
+library(glue)
+library(gt)
+library(gtExtras)
+library(nflverse)
+load('2024_pbp_env.RData')
+```
+
+```{r,include=FALSE}
+ht<-'MIN'
+at<-'DET'
+
+```
+
+```{r,echo=FALSE}
+
+#pbp <- load_pbp(c(2024))
+#pbp <- add_qb_epa(pbp)
+ 
+df_off <- pbp %>%
+  filter(season_type == "REG", down %in% c(1, 2, 3, 4), punt_attempt == 0) %>%
+  group_by(posteam, game_id )%>%
+  summarise(
+    OFF_EPA = mean(epa, na.rm = TRUE),
+    QB_EPA = mean(qb_epa,na.rm = TRUE),
+    QB = max(passer_player_name,na.rm = TRUE),
+    off_success = sum(success,na.rm = TRUE)/n(),
+    fumble = sum(fumble_lost),
+    interception = sum(interception),
+    pass_ypa = sum(passing_yards,na.rm = TRUE)/sum(pass_attempt,na.rm = TRUE),
+    rush_ypa = sum(rushing_yards,na.rm = TRUE)/sum(rush_attempt,na.rm = TRUE),
+    pass_yds = sum(passing_yards,na.rm = TRUE),
+    rush_yds = sum(rushing_yards,na.rm = TRUE),
+    ypp = sum(sum(rushing_yards,na.rm = TRUE) + sum(passing_yards,na.rm = TRUE))/n(),
+    drives = max(drive,na.rm = TRUE)/2,
+    #    home_points = max(home_score,na.rm = TRUE),
+    #    away_points = max(away_score,na.rm = TRUE),
+    home_team = max(home_team,na.rm = TRUE),
+    pressures_allowed = (sum(sack,na.rm = TRUE)+sum(qb_hit,na.rm = TRUE) ), 
+    total_plays_off = n(),
+    points = if_else(max(posteam,na.rm = TRUE) == max(home_team,na.rm = TRUE), max(home_score,na.rm = TRUE),max(away_score,na.rm = TRUE))
+    
+  )
+
+
+df_def<- pbp %>%
+  filter(season_type == "REG", down %in% c(1, 2, 3, 4), punt_attempt == 0) %>%
+  group_by(defteam, game_id )%>%
+  summarise(
+    OFF_EPA_allowed = mean(epa, na.rm = TRUE),
+    QB_EPA_allowed = mean(qb_epa,na.rm = TRUE),
+    def_success = sum(success,na.rm = TRUE)/n(),
+    #QB = max(passer_player_name,na.rm = TRUE),
+    fumbles_forced = sum(fumble_lost),
+    interceptions_forced = sum(interception),
+    pass_ypa_allowed = sum(passing_yards,na.rm = TRUE)/sum(pass_attempt,na.rm = TRUE),
+    rush_ypa_allowed = sum(rushing_yards,na.rm = TRUE)/sum(rush_attempt,na.rm = TRUE),
+    pass_yds_allowed = sum(passing_yards,na.rm = TRUE),
+    rush_yds_allowed = sum(rushing_yards,na.rm = TRUE),
+    ypp_allowed = sum(sum(rushing_yards,na.rm = TRUE) + sum(passing_yards,na.rm = TRUE))/n(),
+    drives_allowed = max(drive,na.rm = TRUE)/2,
+    #    home_points = max(home_score,na.rm = TRUE),
+    #    away_points = max(away_score,na.rm = TRUE),
+    away_team = max(away_team,na.rm = TRUE),
+    pressures_forced = (sum(sack,na.rm = TRUE)+sum(qb_hit,na.rm = TRUE) ), 
+    total_plays_def = n(),
+    points_allowed = if_else(max(defteam,na.rm = TRUE) == max(home_team,na.rm = TRUE), max(away_score,na.rm = TRUE),max(home_score,na.rm = TRUE))
+    
+    
+  )
+
+
+
+df<-cbind(df_off,df_def)
+
+
+```
+
+```{r,echo=FALSE}
+offense <- 
+  df_off %>% group_by(posteam) %>% 
+  summarise(
+    epa = mean(OFF_EPA, na.rm = TRUE),
+    success = mean(off_success,na.rm = TRUE),
+    fumble = mean(fumble, na.rm = TRUE),
+    interception = mean(interception, na.rm = TRUE),
+    pass_ypa = mean(pass_ypa, na.rm = TRUE),
+    rush_ypa = mean(rush_ypa, na.rm = TRUE),
+    pass_ypg = sum(pass_yds,na.rm = TRUE)/n(),
+    rush_ypg = sum(rush_yds,na.rm = TRUE)/n(),
+    ypp = mean(ypp, na.rm = TRUE),
+    drives = mean(drives, na.rm = TRUE),
+    #    home_points = max(home_score,na.rm = TRUE),
+    #    away_points = max(away_score,na.rm = TRUE),
+    pressures = mean(pressures_allowed, na.rm = TRUE), 
+    plays = mean(total_plays_off, na.rm = TRUE),
+    points = mean(points, na.rm = TRUE),
+    
+    
+  )
+```
+
+```{r,echo=FALSE}
+defense <- 
+  df_def %>% group_by(defteam) %>% 
+  summarise(
+    epa = mean(OFF_EPA_allowed, na.rm = TRUE),
+    success = mean(def_success,na.rm = TRUE),
+    fumble = mean(fumbles_forced, na.rm = TRUE),
+    interception = mean(interceptions_forced, na.rm = TRUE),
+    pass_ypa = mean(pass_ypa_allowed, na.rm = TRUE),
+    rush_ypa = mean(rush_ypa_allowed, na.rm = TRUE),
+    pass_ypg = sum(pass_yds_allowed,na.rm = TRUE)/n(),
+    rush_ypg = sum(rush_yds_allowed,na.rm = TRUE)/n(),
+    ypp = mean(ypp_allowed, na.rm = TRUE),
+    drives = mean(drives_allowed, na.rm = TRUE),
+    #    home_points = max(home_score,na.rm = TRUE),
+    #    away_points = max(away_score,na.rm = TRUE),
+    pressures = mean(pressures_forced, na.rm = TRUE), 
+    plays = mean(total_plays_def, na.rm = TRUE),
+    points = mean(points_allowed, na.rm = TRUE),
+    
+    
+  )
+
+
+concat<-rbind(offense[,2:ncol(offense)],defense[,2:ncol(defense)])
+```
+
+```{r,include=FALSE}
+concat_rank<-concat
+
+for (col in colnames(concat_rank)){
+  if( is.numeric(pull(concat_rank[1,col][1]))  ){
+    ifelse( col %in% c('fumble','interception') , concat_rank[col]<-rank(-concat_rank[col]),
+            concat_rank[col]<-rank(concat_rank[col]) )}
+}
+
+```
+
+```{r,include=FALSE}
+
+
+
+o <- offense %>% 
+    filter(posteam %in% c(ht,at))
+for(j in 1:nrow(o)){o$team[j]<-paste(o$posteam[j], "offense")}
+colnames(o)[1]<-"team_name"
+
+
+d <- defense %>% 
+    filter(defteam %in% c(ht,at))
+
+for(j in 1:nrow(d)){d$team[j]<-paste(d$defteam[j], "defense")}
+colnames(d)[1]<-"team_name"
+
+
+```
+
+```{r,include=FALSE}
+
+df1 <- rbind(o[1,],d[2,])
+```
+
+```{r,echo=FALSE,warning=FALSE}
+df1 %>%
+   select(team,  epa, success, fumble,  interception,pass_ypa,rush_ypa, 
+          pass_ypg,rush_ypg, ypp, drives, pressures, plays, points) %>%
+  transmute(Team = team, Points = round(as.numeric(points),2), 
+            epa = round(as.numeric(epa),2),
+            success = success,
+            Pass_YPG = round(as.numeric(pass_ypg),0), 
+            Pass_YPA = round(as.numeric(pass_ypa),2),  
+            Rush_YPG = round(as.numeric(rush_ypg),0),
+            Rush_YPA = round(as.numeric(rush_ypa),2),
+            INTs = round(as.numeric(interception),1),
+            FUM = round(as.numeric(fumble),1) , 
+            YPP = round(as.numeric(ypp),2),
+            Pressures = round(as.numeric(pressures),1),
+            Plays_PG = round(as.numeric(plays),1),
+            Drives = round(as.numeric(drives),1)) %>% 
+gt(rowname_col = c("Team")) %>% 
+    cols_label(
+    Team = md("**Team**"),
+    Points = md("**Points**"),
+    epa = md("**EPA**"),
+    success = md("**Success**"),
+   Pass_YPG = md("**Pass YPG**"),
+   Pass_YPA = md("**Pass YPA**"),
+   Rush_YPG = md("**Rush YPG**"),
+   Rush_YPA = md("**Rush YPA**"),
+   INTs = md("**INTs**"),
+   FUM = md("**FUM**"),
+   YPP = md("**YPP**"),
+   Pressures = md("**Pressures**"),
+   Plays_PG = md("**Plays PG**"),
+   Drives = md("**Drives**"),
+  ) %>% 
+    fmt_number(
+        columns = c(Pass_YPG, Rush_YPG, Plays_PG ),
+        decimals = 0
+    ) %>% 
+      fmt_number(
+        columns = c(Points,INTs,FUM, Rush_YPG, Plays_PG, Pressures,Drives),
+        decimals = 1
+    ) %>% 
+        fmt_number(
+        columns = c(epa,success, Pass_YPA, Rush_YPA,YPP),
+        decimals = 2
+    ) %>% 
+    data_color(
+        columns = c(Points),
+        colors = scales::col_numeric(
+            palette = c('red','white','blue'),
+            domain = c(min(concat$points,na.rm = TRUE),max(concat$points,na.rm = TRUE)
+            )
+        )
+    ) %>% 
+        data_color(
+        columns = c(epa),
+        colors = scales::col_numeric(
+            palette = c('red','white','blue'),
+            domain = c(min(as.numeric(concat$epa),na.rm = TRUE),
+                       max(as.numeric(concat$epa),na.rm = TRUE)
+            )
+        )
+    )  %>% 
+        data_color(
+        columns = c(success),
+        colors = scales::col_numeric(
+            palette = c('red','white','blue'),
+            domain = c(min(as.numeric(concat$success),na.rm = TRUE),
+                       max(as.numeric(concat$success) ,na.rm = TRUE)
+            )
+        )
+    )  %>% 
+        data_color(
+        columns = c(Pass_YPG),
+        colors = scales::col_numeric(
+            palette = c('red','white','blue'),
+            domain = c(min(as.numeric(concat$pass_ypg),na.rm = TRUE),
+                       max(as.numeric(concat$pass_ypg),na.rm = TRUE)
+            )
+        )
+    )  %>% 
+        data_color(
+        columns = c(Pass_YPA),
+        colors = scales::col_numeric(
+            palette = c('red','white','blue'),
+            domain = c(min(as.numeric(concat$pass_ypa),na.rm = TRUE),
+                       max(as.numeric(concat$pass_ypa),na.rm = TRUE)
+            )
+        )
+    ) %>% 
+        data_color(
+        columns = c(Rush_YPG),
+        colors = scales::col_numeric(
+            palette = c('red','white','blue'),
+            domain = c(min(as.numeric(concat$rush_ypg),na.rm = TRUE),
+                       max(as.numeric(concat$rush_ypg),na.rm = TRUE)
+            )
+        )
+    ) %>% 
+        data_color(
+        columns = c(Rush_YPA),
+        colors = scales::col_numeric(
+            palette = c('red','white','blue'),
+            domain = c(min(as.numeric(concat$rush_ypa)),
+                       max(as.numeric(concat$rush_ypa))
+            )
+        )
+    )  %>% 
+        data_color(
+        columns = c(INTs),
+        colors = scales::col_numeric(
+            palette = c('blue','white','red'),
+            domain = c(min(as.numeric(concat$interception)),
+                       max(as.numeric(concat$interception))
+            )
+        )
+        )%>% 
+        data_color(
+        columns = c(FUM),
+        colors = scales::col_numeric(
+            palette = c('red','blue','white'),
+            domain = c(min(as.numeric(concat$fumble)),
+                       max(as.numeric(concat$fumble))
+            )
+        )
+        )%>%
+          data_color(
+        columns = c(Pressures),
+        colors = scales::col_numeric(
+            palette = c('red','white','blue'),
+            domain = c(min(as.numeric(concat$pressures)),
+                       max(as.numeric(concat$pressures))
+            )
+        )
+        )%>%
+          data_color(
+        columns = c(Plays_PG),
+        colors = scales::col_numeric(
+            palette = c('red','white','blue'),
+            domain = c(min(as.numeric(concat$plays)),
+                       max(as.numeric(concat$plays))
+            )
+        )
+        )%>%
+          data_color(
+        columns = c(Drives),
+        colors = scales::col_numeric(
+            palette = c('red','white','blue'),
+            domain = c(min(as.numeric(concat$drives)),
+                       max(as.numeric(concat$drives))
+            )
+        )
+        )%>%
+        data_color(
+        columns = c(YPP),
+        colors = scales::col_numeric(
+            palette = c('red','white','blue'),
+            domain = c(min(as.numeric(concat$ypp)),
+                       max(as.numeric(concat$ypp))
+            )
+        )
+    ) %>% 
+    tab_header(
+    title = md("**Statistical Comparison (Home OFF)**"),
+    subtitle = md("Week 7")
+    ) 
+
+
+```
+
+```{r,include=FALSE}
+offense_rank <- offense
+for (col in colnames(offense_rank)){
+  if( is.numeric(pull(offense_rank[1,col][1]))  ){
+    ifelse( col %in% c('fumble','interception') , offense_rank[col]<-rank(offense_rank[col]),
+            offense_rank[col]<-rank(-offense_rank[col]) )}
+}
+
+defense_rank <- defense
+for (col in colnames(defense_rank)){
+  if( is.numeric(pull(defense_rank[1,col][1]))  ){
+    ifelse( col %in% c('fumble','interception') , defense_rank[col]<-rank(-defense_rank[col]),
+            defense_rank[col]<-rank(defense_rank[col]) )}
+}
+
+
+```
+
+```{r,echo=FALSE,inlclude = FALSE,warning=FALSE}
+offense_rank['team'] = 0
+defense_rank['team'] = 0
+
+o_rank <- offense_rank %>% 
+    filter(posteam %in% c(ht,at))
+for(j in 1:nrow(o_rank)){o_rank$team[j]<-paste(o_rank$posteam[j], "offense")}
+colnames(o_rank)[1]<-"team_name"
+
+
+d_rank <- defense_rank %>% 
+    filter(defteam %in% c(ht,at))
+
+for(j in 1:nrow(d_rank)){d_rank$team[j]<-paste(d_rank$defteam[j], "defense")}
+colnames(d_rank)[1]<-"team_name"
+
+df1_rank <- rbind(o_rank[1,],d_rank[2,])
+
+```
+
+
+```{r,echo=FALSE, warning=FALSE}
+df1_rank %>%
+   select(team,  epa, success, fumble,  interception,pass_ypa,rush_ypa, 
+          pass_ypg,rush_ypg, ypp, drives, pressures, plays, points) %>%
+  transmute(Team = team, Points = round(as.numeric(points),2), 
+            epa = round(as.numeric(epa),2),
+            success = success,
+            Pass_YPG = round(as.numeric(pass_ypg),0), 
+            Pass_YPA = round(as.numeric(pass_ypa),2),  
+            Rush_YPG = round(as.numeric(rush_ypg),0),
+            Rush_YPA = round(as.numeric(rush_ypa),2),
+            INTs = round(as.numeric(interception),1),
+            FUM = round(as.numeric(fumble),1) , 
+            YPP = round(as.numeric(ypp),2),
+            Pressures = round(as.numeric(pressures),1),
+            Plays_PG = round(as.numeric(plays),1),
+            Drives = round(as.numeric(drives),1)) %>% 
+gt(rowname_col = c("Team")) %>% 
+    cols_label(
+    Team = md("**Team**"),
+    Points = md("**Points**"),
+    epa = md("**EPA**"),
+    success = md("**Success**"),
+   Pass_YPG = md("**Pass YPG**"),
+   Pass_YPA = md("**Pass YPA**"),
+   Rush_YPG = md("**Rush YPG**"),
+   Rush_YPA = md("**Rush YPA**"),
+   INTs = md("**INTs**"),
+   FUM = md("**FUM**"),
+   YPP = md("**YPP**"),
+   Pressures = md("**Pressures**"),
+   Plays_PG = md("**Plays PG**"),
+   Drives = md("**Drives**"),
+  ) %>% 
+    fmt_number(
+        columns = c(Pass_YPG, Rush_YPG, Plays_PG ),
+        decimals = 0
+    ) %>% 
+      fmt_number(
+        columns = c(Points,INTs,FUM, Rush_YPG, Plays_PG, Pressures,Drives),
+        decimals = 1
+    ) %>% 
+        fmt_number(
+        columns = c(epa,success, Pass_YPA, Rush_YPA,YPP),
+        decimals = 2
+    ) %>% 
+    data_color(
+        columns = c(Points),
+        colors = scales::col_numeric(
+            palette = c('blue','white','red'),
+            domain = c(32,1
+            )
+        )
+    ) %>% 
+        data_color(
+        columns = c(epa),
+        colors = scales::col_numeric(
+            palette = c('blue','white','red'),
+            domain = c(32,1
+            )
+        )
+    )  %>% 
+        data_color(
+        columns = c(success),
+        colors = scales::col_numeric(
+            palette = c('blue','white','red'),
+            domain = c(1,32
+            )
+        )
+    )  %>% 
+        data_color(
+        columns = c(Pass_YPG),
+        colors = scales::col_numeric(
+            palette = c('blue','white','red'),
+            domain = c(1,32
+            )
+        )
+    )  %>% 
+        data_color(
+        columns = c(Pass_YPA),
+        colors = scales::col_numeric(
+            palette = c('blue','white','red'),
+            domain = c(1,32
+            )
+        )
+    ) %>% 
+        data_color(
+        columns = c(Rush_YPG),
+        colors = scales::col_numeric(
+            palette = c('blue','white','red'),
+            domain = c(1,32
+            )
+        )
+    ) %>% 
+        data_color(
+        columns = c(Rush_YPA),
+        colors = scales::col_numeric(
+            palette = c('blue','white','red'),
+            domain = c(1,32
+            )
+        )
+    )  %>% 
+        data_color(
+        columns = c(INTs),
+        colors = scales::col_numeric(
+            palette = c('red','white','blue'),
+            domain = c(1,32
+            )
+        )
+        )%>% 
+        data_color(
+        columns = c(FUM),
+        colors = scales::col_numeric(
+            palette = c('red','white','blue'),
+            domain = c(1,32
+            )
+        )
+        )%>%
+          data_color(
+        columns = c(Pressures),
+        colors = scales::col_numeric(
+            palette = c('blue','white','red'),
+            domain = c(1,32
+            )
+        )
+        )%>%
+          data_color(
+        columns = c(Plays_PG),
+        colors = scales::col_numeric(
+            palette = c('blue','white','red'),
+            domain = c(1,32
+            )
+        )
+        )%>%
+          data_color(
+        columns = c(Drives),
+        colors = scales::col_numeric(
+            palette = c('blue','white','red'),
+            domain = c(1,32
+            )
+        )
+        )%>%
+        data_color(
+        columns = c(YPP),
+        colors = scales::col_numeric(
+            palette = c('blue','white','red'),
+            domain = c(1,32
+            )
+        )
+    )
+
+```
+
+
+```{r,include=FALSE}
+df2 <- rbind(o[2,],d[1,])
+df2_rank<- rbind(o_rank[2,],d_rank[1,])
+
+```
+
+
+```{r,echo=FALSE}
+df2 %>%
+   select(team,  epa, success, fumble,  interception,pass_ypa,rush_ypa, 
+          pass_ypg,rush_ypg, ypp, drives, pressures, plays, points) %>%
+  transmute(Team = team, Points = round(as.numeric(points),2), 
+            epa = round(as.numeric(epa),2),
+            success = success,
+            Pass_YPG = round(as.numeric(pass_ypg),0), 
+            Pass_YPA = round(as.numeric(pass_ypa),2),  
+            Rush_YPG = round(as.numeric(rush_ypg),0),
+            Rush_YPA = round(as.numeric(rush_ypa),2),
+            INTs = round(as.numeric(interception),1),
+            FUM = round(as.numeric(fumble),1) , 
+            YPP = round(as.numeric(ypp),2),
+            Pressures = round(as.numeric(pressures),1),
+            Plays_PG = round(as.numeric(plays),1),
+            Drives = round(as.numeric(drives),1)) %>% 
+gt(rowname_col = c("Team")) %>% 
+    cols_label(
+    Team = md("**Team**"),
+    Points = md("**Points**"),
+    epa = md("**EPA**"),
+    success = md("**Success**"),
+   Pass_YPG = md("**Pass YPG**"),
+   Pass_YPA = md("**Pass YPA**"),
+   Rush_YPG = md("**Rush YPG**"),
+   Rush_YPA = md("**Rush YPA**"),
+   INTs = md("**INTs**"),
+   FUM = md("**FUM**"),
+   YPP = md("**YPP**"),
+   Pressures = md("**Pressures**"),
+   Plays_PG = md("**Plays PG**"),
+   Drives = md("**Drives**"),
+  ) %>% 
+    fmt_number(
+        columns = c(Pass_YPG, Rush_YPG, Plays_PG ),
+        decimals = 0
+    ) %>% 
+      fmt_number(
+        columns = c(Points,INTs,FUM, Rush_YPG, Plays_PG, Pressures,Drives),
+        decimals = 1
+    ) %>% 
+        fmt_number(
+        columns = c(epa,success, Pass_YPA, Rush_YPA,YPP),
+        decimals = 2
+    ) %>% 
+    data_color(
+        columns = c(Points),
+        colors = scales::col_numeric(
+            palette = c('red','white','blue'),
+            domain = c(min(concat$points,na.rm = TRUE),max(concat$points,na.rm = TRUE)
+            )
+        )
+    ) %>% 
+        data_color(
+        columns = c(epa),
+        colors = scales::col_numeric(
+            palette = c('red','white','blue'),
+            domain = c(min(as.numeric(concat$epa),na.rm = TRUE),
+                       max(as.numeric(concat$epa),na.rm = TRUE)
+            )
+        )
+    )  %>% 
+        data_color(
+        columns = c(success),
+        colors = scales::col_numeric(
+            palette = c('red','white','blue'),
+            domain = c(min(as.numeric(concat$success),na.rm = TRUE),
+                       max(as.numeric(concat$success) ,na.rm = TRUE)
+            )
+        )
+    )  %>% 
+        data_color(
+        columns = c(Pass_YPG),
+        colors = scales::col_numeric(
+            palette = c('red','white','blue'),
+            domain = c(min(as.numeric(concat$pass_ypg),na.rm = TRUE),
+                       max(as.numeric(concat$pass_ypg),na.rm = TRUE)
+            )
+        )
+    )  %>% 
+        data_color(
+        columns = c(Pass_YPA),
+        colors = scales::col_numeric(
+            palette = c('red','white','blue'),
+            domain = c(min(as.numeric(concat$pass_ypa),na.rm = TRUE),
+                       max(as.numeric(concat$pass_ypa),na.rm = TRUE)
+            )
+        )
+    ) %>% 
+        data_color(
+        columns = c(Rush_YPG),
+        colors = scales::col_numeric(
+            palette = c('red','white','blue'),
+            domain = c(min(as.numeric(concat$rush_ypg),na.rm = TRUE),
+                       max(as.numeric(concat$rush_ypg),na.rm = TRUE)
+            )
+        )
+    ) %>% 
+        data_color(
+        columns = c(Rush_YPA),
+        colors = scales::col_numeric(
+            palette = c('red','white','blue'),
+            domain = c(min(as.numeric(concat$rush_ypa)),
+                       max(as.numeric(concat$rush_ypa))
+            )
+        )
+    )  %>% 
+        data_color(
+        columns = c(INTs),
+        colors = scales::col_numeric(
+            palette = c('blue','white','red'),
+            domain = c(min(as.numeric(concat$interception)),
+                       max(as.numeric(concat$interception))
+            )
+        )
+        )%>% 
+        data_color(
+        columns = c(FUM),
+        colors = scales::col_numeric(
+            palette = c('red','blue','white'),
+            domain = c(min(as.numeric(concat$fumble)),
+                       max(as.numeric(concat$fumble))
+            )
+        )
+        )%>%
+          data_color(
+        columns = c(Pressures),
+        colors = scales::col_numeric(
+            palette = c('red','white','blue'),
+            domain = c(min(as.numeric(concat$pressures)),
+                       max(as.numeric(concat$pressures))
+            )
+        )
+        )%>%
+          data_color(
+        columns = c(Plays_PG),
+        colors = scales::col_numeric(
+            palette = c('red','white','blue'),
+            domain = c(min(as.numeric(concat$plays)),
+                       max(as.numeric(concat$plays))
+            )
+        )
+        )%>%
+          data_color(
+        columns = c(Drives),
+        colors = scales::col_numeric(
+            palette = c('red','white','blue'),
+            domain = c(min(as.numeric(concat$drives)),
+                       max(as.numeric(concat$drives))
+            )
+        )
+        )%>%
+        data_color(
+        columns = c(YPP),
+        colors = scales::col_numeric(
+            palette = c('red','white','blue'),
+            domain = c(min(as.numeric(concat$ypp)),
+                       max(as.numeric(concat$ypp))
+            )
+        )
+    ) %>% 
+    tab_header(
+    title = md("**Statistical Comparison (Away OFF)**"),
+    subtitle = md("Week 7")
+    ) 
+
+```
+
+```{r,echo=FALSE}
+df2_rank %>%
+   select(team,  epa, success, fumble,  interception,pass_ypa,rush_ypa, 
+          pass_ypg,rush_ypg, ypp, drives, pressures, plays, points) %>%
+  transmute(Team = team, Points = round(as.numeric(points),2), 
+            epa = round(as.numeric(epa),2),
+            success = success,
+            Pass_YPG = round(as.numeric(pass_ypg),0), 
+            Pass_YPA = round(as.numeric(pass_ypa),2),  
+            Rush_YPG = round(as.numeric(rush_ypg),0),
+            Rush_YPA = round(as.numeric(rush_ypa),2),
+            INTs = round(as.numeric(interception),1),
+            FUM = round(as.numeric(fumble),1) , 
+            YPP = round(as.numeric(ypp),2),
+            Pressures = round(as.numeric(pressures),1),
+            Plays_PG = round(as.numeric(plays),1),
+            Drives = round(as.numeric(drives),1)) %>% 
+gt(rowname_col = c("Team")) %>% 
+    cols_label(
+    Team = md("**Team**"),
+    Points = md("**Points**"),
+    epa = md("**EPA**"),
+    success = md("**Success**"),
+   Pass_YPG = md("**Pass YPG**"),
+   Pass_YPA = md("**Pass YPA**"),
+   Rush_YPG = md("**Rush YPG**"),
+   Rush_YPA = md("**Rush YPA**"),
+   INTs = md("**INTs**"),
+   FUM = md("**FUM**"),
+   YPP = md("**YPP**"),
+   Pressures = md("**Pressures**"),
+   Plays_PG = md("**Plays PG**"),
+   Drives = md("**Drives**"),
+  ) %>% 
+    fmt_number(
+        columns = c(Pass_YPG, Rush_YPG, Plays_PG ),
+        decimals = 0
+    ) %>% 
+      fmt_number(
+        columns = c(Points,INTs,FUM, Rush_YPG, Plays_PG, Pressures,Drives),
+        decimals = 1
+    ) %>% 
+        fmt_number(
+        columns = c(epa,success, Pass_YPA, Rush_YPA,YPP),
+        decimals = 2
+    ) %>% 
+    data_color(
+        columns = c(Points),
+        colors = scales::col_numeric(
+            palette = c('blue','white','red'),
+            domain = c(32,1
+            )
+        )
+    ) %>% 
+        data_color(
+        columns = c(epa),
+        colors = scales::col_numeric(
+            palette = c('blue','white','red'),
+            domain = c(32,1
+            )
+        )
+    )  %>% 
+        data_color(
+        columns = c(success),
+        colors = scales::col_numeric(
+            palette = c('blue','white','red'),
+            domain = c(1,32
+            )
+        )
+    )  %>% 
+        data_color(
+        columns = c(Pass_YPG),
+        colors = scales::col_numeric(
+            palette = c('blue','white','red'),
+            domain = c(1,32
+            )
+        )
+    )  %>% 
+        data_color(
+        columns = c(Pass_YPA),
+        colors = scales::col_numeric(
+            palette = c('blue','white','red'),
+            domain = c(1,32
+            )
+        )
+    ) %>% 
+        data_color(
+        columns = c(Rush_YPG),
+        colors = scales::col_numeric(
+            palette = c('blue','white','red'),
+            domain = c(1,32
+            )
+        )
+    ) %>% 
+        data_color(
+        columns = c(Rush_YPA),
+        colors = scales::col_numeric(
+            palette = c('blue','white','red'),
+            domain = c(1,32
+            )
+        )
+    )  %>% 
+        data_color(
+        columns = c(INTs),
+        colors = scales::col_numeric(
+            palette = c('red','white','blue'),
+            domain = c(1,32
+            )
+        )
+        )%>% 
+        data_color(
+        columns = c(FUM),
+        colors = scales::col_numeric(
+            palette = c('red','white','blue'),
+            domain = c(1,32
+            )
+        )
+        )%>%
+          data_color(
+        columns = c(Pressures),
+        colors = scales::col_numeric(
+            palette = c('blue','white','red'),
+            domain = c(1,32
+            )
+        )
+        )%>%
+          data_color(
+        columns = c(Plays_PG),
+        colors = scales::col_numeric(
+            palette = c('blue','white','red'),
+            domain = c(1,32
+            )
+        )
+        )%>%
+          data_color(
+        columns = c(Drives),
+        colors = scales::col_numeric(
+            palette = c('blue','white','red'),
+            domain = c(1,32
+            )
+        )
+        )%>%
+        data_color(
+        columns = c(YPP),
+        colors = scales::col_numeric(
+            palette = c('blue','white','red'),
+            domain = c(1,32
+            )
+        )
+    )
+
+```
+

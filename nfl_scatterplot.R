@@ -23,7 +23,6 @@ afc<-info %>%
 
 pbp<-load_pbp()
 
-nflfastR::
 
 df <- pbp %>% 
   filter(season_type =="REG",down %in% c(1,2,3,4)) %>% 
@@ -60,7 +59,7 @@ epa_comp$epa_allowed_sector<-ifelse(epa_comp$EPA_Allowed_rank <=16,1,2)
 df_off$opponent_sector<-0
 
 for(i in 1:nrow(df_off)){
-  df_off$opponent_sector[i]<-epa_comp$epa_allowed_sector[which(epa_comp$Team == df_off$defteam[i])]
+  df_off$opponent_sector[i]<-epa_comp$epa_allowed_sector[which(epa_comp$defteam == df_off$defteam[i])]
 }
 
 df_off <-df_off %>% 
@@ -84,14 +83,21 @@ df_off <- df_off %>%
   )
 
 ggplot2::ggplot(df_off, aes(x = avg_epa_below, y = avg_epa_above)) +
+  annotate("text", x=-0.05, y=0.05, label= "Plays well against good defenses 
+/ Worse against bad defenses",size=3,col='red') +
+  annotate("text", x=0.10, y=0.05, label= "Plays well against good defenses 
+& bad defenses",size=3,col='red') +
+  annotate("text", x=0.10, y=-0.18, label= "Plays well against bad defenses 
+/ Worse against good defenses",size=3,col='red') +
+  annotate("text", x=-0.05, y=-0.18, label= "Bad offense against everyone",size=3,col='red') +
   #ggplot2::geom_abline(slope = -1.5, intercept = seq(0.4, -0.3, -0.1), alpha = .2) +
   nflplotR::geom_mean_lines(aes(x0 = avg_epa_below , y0 = avg_epa_above)) +
   nflplotR::geom_nfl_logos(aes(team_abbr = posteam), width = 0.065, alpha = 0.7) +
   ggplot2::labs(
-    x = "Offensive EPA/play vs. Lower Half Defense",
-    y = "Offensive EPA/play vs. Upper Half Defense",
+    x = "Offensive EPA vs. Lower Half Defense",
+    y = "Offensive EPA vs. Upper Half Defense",
     caption = "Data: @nflfastR",
-    title = "2023 OFF EPA/play Against Good Defenses Versus OFF EPA/play Against Bad Defenses"
+    title = "2024 OFF EPA Against Good Defenses Versus OFF EPA Against Bad Defenses"
   ) +
   ggplot2::theme_minimal() +
   ggplot2::theme(

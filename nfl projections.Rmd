@@ -60,27 +60,32 @@ source('nfl_ypp_model.r')
 
 
 ```{r}
-week=6
+week=7
 
 ```
 
 ```{r}
 ### ypp model ###
+if (TRUE){
 ypp_proj<-YPP(season=2024,week=week)
 rows <- nrow(ypp_proj) 
 odd_rows <- seq_len(rows) %% 2 
 # getting data from odd data frame 
 data_mod <- ypp_proj[odd_rows == 1, ] 
+ypp_inp=TRUE
+}else(ypp_inp=FALSE)
 ```
 
 
 ```{python}
 from points_model import nfl_model
+from nfl_game_projections import *
 import pandas as pd
 
 ypp_input = pd.DataFrame(r.data_mod)
 #projections = nfl_model().projections(week=int(r.week),ypp_input = ypp_input)
-projections = nfl_model().projections(week=int(r.week))
+#projections = nfl_model().projections(week=int(r.week))
+projections = projections(week=7).run()
 r.projections = projections
 ```
 
@@ -92,6 +97,8 @@ schedule <- schedule[which(schedule$week == week),]
 schedule['away_total']<-schedule$total_line/2 - schedule$spread_line/2
 schedule['home_total']<-schedule$total_line/2 + schedule$spread_line/2
 proj<- tibble(projections)
+colnames(proj)[1]<-"home";colnames(proj)[2]<-"home_score";colnames(proj)[3]<-"away"
+colnames(proj)[4]<-"away_score"
 proj$home_score = as.numeric(proj$home_score);proj$away_score = as.numeric(proj$away_score)
 ```
 
@@ -107,10 +114,13 @@ for (game in 1:nrow(proj)){
     proj$home_score[game]<-(proj$home_score[game] + sched$home_total)/2
     proj$away_score[game]<-(proj$away_score[game] + sched$away_total)/2
     
+    if (ypp_inp != FALSE){
+
     proj$home_ypp[game]<- data_mod$home_off_ypp[which(data_mod$home == proj$home[game])] 
     proj$away_ypp[game]<- data_mod$away_off_ypp[which(data_mod$away == proj$away[game])] 
-}
 
+    }
+}
 ```
 
 
@@ -195,7 +205,7 @@ df<-cbind(df_off,df_def)
 off <- df %>% 
   group_by(posteam) %>% 
   summarise(
-    EPA = median(OFF_EPA),
+    EPA = mean(OFF_EPA),
     ypp = median(ypp)
   )
 
@@ -203,7 +213,7 @@ off <- df %>%
 def <- df %>% 
   group_by(defteam) %>% 
   summarise(
-    EPA_allowed = median(OFF_EPA_allowed),
+    EPA_allowed = mean(OFF_EPA_allowed),
     ypp_allowed = median(ypp_allowed)
   )
 
@@ -370,8 +380,8 @@ NFL_table_clean<-NFL_table_clean %>% filter(!is.na(Home_Proj))
 ```{r}
 ## -------------------- use for creating show previews -------------------- ##
 
-# show_data<-NFL_table_clean %>%
-#   filter(Home == "Falcons")
+show_data<-NFL_table_clean %>%
+  filter(Home == "Packers")
 
 ```
 
@@ -428,8 +438,8 @@ team_rating_column <- function(maxWidth = 75, ...) {
 
 table <-
     reactable(
-      NFL_table_clean,
-      #show_data,
+      #NFL_table_clean,
+      show_data,
       pagination = FALSE,
       showSortIcon = FALSE,
       highlight = TRUE,

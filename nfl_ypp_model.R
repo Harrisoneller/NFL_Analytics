@@ -33,8 +33,6 @@ meansd <- function(x, ...) {
 
 pbp <- load_pbp(c(2023,2024))
 pbp <- add_qb_epa(pbp)
-factor(pbp$posteam)
-colnames(pbp)
 
 players<-calculate_player_stats(pbp=pbp)
 quarterbacks<-players[which(players$position == "QB"),'player_id']
@@ -72,8 +70,7 @@ meansd <- function(x, ...) {
 
 pbp <- load_pbp(c(2023,2024))
 pbp <- add_qb_epa(pbp)
-factor(pbp$posteam)
-colnames(pbp)
+
 
 players<-calculate_player_stats(pbp=pbp)
 quarterbacks<-players[which(players$position == "QB"),'player_id']
