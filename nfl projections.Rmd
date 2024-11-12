@@ -60,8 +60,8 @@ source('nfl_ypp_model.r')
 
 
 ```{r}
-week=7
-
+week=11
+xgb=TRUE
 ```
 
 ```{r}
@@ -84,8 +84,11 @@ import pandas as pd
 
 ypp_input = pd.DataFrame(r.data_mod)
 #projections = nfl_model().projections(week=int(r.week),ypp_input = ypp_input)
-#projections = nfl_model().projections(week=int(r.week))
-projections = projections(week=7).run()
+if r.xgb:
+  projections = nfl_model().projections(week=int(r.week))
+else:
+  projections = projections(week=r.week).run()
+  
 r.projections = projections
 ```
 
@@ -97,8 +100,13 @@ schedule <- schedule[which(schedule$week == week),]
 schedule['away_total']<-schedule$total_line/2 - schedule$spread_line/2
 schedule['home_total']<-schedule$total_line/2 + schedule$spread_line/2
 proj<- tibble(projections)
-colnames(proj)[1]<-"home";colnames(proj)[2]<-"home_score";colnames(proj)[3]<-"away"
+if (xgb==TRUE){
+colnames(proj)[1]<-"home";colnames(proj)[2]<-"home_score";colnames(proj)[4]<-"away"
+colnames(proj)[3]<-"away_score"
+}else{
+  colnames(proj)[1]<-"home";colnames(proj)[2]<-"home_score";colnames(proj)[3]<-"away"
 colnames(proj)[4]<-"away_score"
+}
 proj$home_score = as.numeric(proj$home_score);proj$away_score = as.numeric(proj$away_score)
 ```
 
@@ -372,6 +380,7 @@ NFL_table_clean <- schedule %>%
   )
 
 NFL_table_clean<-NFL_table_clean %>% filter(!is.na(Home_Proj))
+show_data<-NFL_table_clean
 # show_data<-NFL_table_clean %>% 
 #    filter(Home == "Cowboys")
 ```
@@ -380,8 +389,8 @@ NFL_table_clean<-NFL_table_clean %>% filter(!is.na(Home_Proj))
 ```{r}
 ## -------------------- use for creating show previews -------------------- ##
 
-show_data<-NFL_table_clean %>%
-  filter(Home == "Packers")
+# show_data<-NFL_table_clean %>%
+#   filter(Home == "Bears")
 
 ```
 
@@ -505,7 +514,7 @@ table <-
             ### Team name
             div(class = "team-name", value),
             ### Team record
-            div(class = "record",  sprintf("(%s)", NFL_table_clean[index, "Home_Record"])))
+            div(class = "record",  sprintf("(%s)", show_data[index, "Home_Record"])))
       }
     ),
       Home_YPP = colDef(
@@ -619,7 +628,7 @@ table <-
             ### Team name
             div(class = "team-name", value),
             ### Team record
-            div(class = "record",  sprintf("(%s)", NFL_table_clean[index, "Away_Record"])))
+            div(class = "record",  sprintf("(%s)", show_data[index, "Away_Record"])))
       }
     ),
     

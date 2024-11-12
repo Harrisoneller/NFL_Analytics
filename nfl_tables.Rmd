@@ -29,7 +29,7 @@ load('2024_pbp_env.RData')
 
 ```{r,include=FALSE}
 ht<-'SF'
-at<-'DAL'
+at<-'SEA'
 
 ```
 
@@ -364,7 +364,7 @@ for (col in colnames(offense_rank)){
 defense_rank <- defense
 for (col in colnames(defense_rank)){
   if( is.numeric(pull(defense_rank[1,col][1]))  ){
-    ifelse( col %in% c('fumble','interception') , defense_rank[col]<-rank(-defense_rank[col]),
+    ifelse( col %in% c('fumble','interception','pressures') , defense_rank[col]<-rank(-defense_rank[col]),
             defense_rank[col]<-rank(defense_rank[col]) )}
 }
 
