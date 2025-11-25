@@ -500,4 +500,4 @@ class nfl_model:
 
             
 
-#exp = nfl_model().projections(week=2,ypp_input=None)
+#exp = nfl_model().projections(week=19,ypp_input=None)

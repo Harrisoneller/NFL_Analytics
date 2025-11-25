@@ -206,16 +206,16 @@ rownames(agg) <- teams
 
 teams_pca <- prcomp(agg, center = TRUE, scale = TRUE)
 
-fviz_pca_biplot(rushers_pca, geom = c("point", "text")) +
+fviz_pca_biplot(teams_pca, geom = c("point", "text")) +
   xlim(-6, 3) +
   labs(title = "**PCA Biplot: PC1 and PC2**") +
   xlab("PC1 - 35.8%") +
   ylab("PC2 - 24.6%")
 
-get_eigenvalue(rushers_pca)
+get_eigenvalue(teams_pca)
 
 
-fviz_eig(rushers_pca, addlabels = TRUE) +
+fviz_eig(teams_pca, addlabels = TRUE) +
   xlab("Principal Component") +
   ylab("% of Variance Explained") +
   labs(title = "**PCA Analysis: Scree Plot**")

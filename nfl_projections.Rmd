@@ -54,19 +54,20 @@ library(car)
 library(tidyverse)
 library(gt)
 library(gsisdecoder)
+library(reticulate)
 setwd("/Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics")
 source('nfl_ypp_model.r')
 ```
 
 
 ```{r}
-week=11
+week=22
 xgb=TRUE
 ```
 
-```{r}
+```{r,echo=FALSE}
 ### ypp model ###
-if (TRUE){
+if (FALSE){
 ypp_proj<-YPP(season=2024,week=week)
 rows <- nrow(ypp_proj) 
 odd_rows <- seq_len(rows) %% 2 
@@ -82,16 +83,29 @@ from points_model import nfl_model
 from nfl_game_projections import *
 import pandas as pd
 
-ypp_input = pd.DataFrame(r.data_mod)
+if not (r.xgb): ypp_input = pd.DataFrame(r.data_mod)
 #projections = nfl_model().projections(week=int(r.week),ypp_input = ypp_input)
-if r.xgb:
-  projections = nfl_model().projections(week=int(r.week))
-else:
-  projections = projections(week=r.week).run()
-  
+# if r.xgb:
+#   projections = nfl_model().projections(week=int(r.week))
+# else:
+#   projections = projections(week=r.week).run()
+#   
+projections = nfl_model().projections(week=int(r.week))
+
 r.projections = projections
 ```
 
+```{r}
+pbp<-load_pbp(2024)
+
+df_off <- pbp %>%
+  filter(season_type == "REG", down %in% c(1, 2, 3, 4), punt_attempt == 0) %>%
+  group_by(posteam )%>%
+  summarise(
+    ypp = sum(sum(rushing_yards,na.rm = TRUE) + sum(passing_yards,na.rm = TRUE))/n()
+  )
+
+```
 
 
 ```{r}
@@ -111,7 +125,8 @@ proj$home_score = as.numeric(proj$home_score);proj$away_score = as.numeric(proj$
 ```
 
 
-```{r}
+```{r,echo=FALSE}
+ypp_inp = FALSE
 proj['home_ypp']=0
 proj['away_ypp']=0
 
@@ -119,13 +134,13 @@ for (game in 1:nrow(proj)){
     sched <- schedule %>% 
       filter(home_team==proj$home[game] & away_team==proj$away[game])
     
-    proj$home_score[game]<-(proj$home_score[game] + sched$home_total)/2
-    proj$away_score[game]<-(proj$away_score[game] + sched$away_total)/2
+    #proj$home_score[game]<-(proj$home_score[game] + sched$home_total)/2
+    #proj$away_score[game]<-(proj$away_score[game] + sched$away_total)/2
     
-    if (ypp_inp != FALSE){
+    if (ypp_inp == FALSE){
 
-    proj$home_ypp[game]<- data_mod$home_off_ypp[which(data_mod$home == proj$home[game])] 
-    proj$away_ypp[game]<- data_mod$away_off_ypp[which(data_mod$away == proj$away[game])] 
+    proj$home_ypp[game]<- df_off$ypp[which(df_off$posteam == proj$home[game])] 
+    proj$away_ypp[game]<-df_off$ypp[which(df_off$posteam == proj$away[game])] 
 
     }
 }
@@ -134,7 +149,7 @@ for (game in 1:nrow(proj)){
 
 
 
-```{r}
+```{r, echo=FALSE}
 ################ EPA scrape ###############
 
 info <- nflfastR::teams_colors_logos
@@ -379,19 +394,32 @@ NFL_table_clean <- schedule %>%
     
   )
 
-NFL_table_clean<-NFL_table_clean %>% filter(!is.na(Home_Proj))
+#NFL_table_clean<-NFL_table_clean %>% filter(!is.na(Home_Proj))
 show_data<-NFL_table_clean
 # show_data<-NFL_table_clean %>% 
-#    filter(Home == "Cowboys")
+#    filter(Home == "Commanders")
 ```
 
 
 ```{r}
 ## -------------------- use for creating show previews -------------------- ##
+#
+
+
+# show_data$Away_Proj[1]<-20.5
 
 # show_data<-NFL_table_clean %>%
-#   filter(Home == "Bears")
+#   filter(Home == "Chiefs")
 
+show_data$Home_Proj[1]<-21.0
+show_data$Away_Proj[1]<-20.9
+# show_data$Home_Proj[1]<-22.59
+# show_data$Away_Proj[1]<-20.18
+# show_data$Home_Proj[1]<-24.8
+# show_data$Away_Proj[1]<-20.3
+# show_data$Home_Proj[4]<-22.98
+# show_data$Away_Proj[4]<-24.33
+# 
 ```
 
 
@@ -475,7 +503,7 @@ table <-
           cell = function(value) {
           ### Normalize team rating in order to assign color from color palette
             normalized <-
-              (value - min(unlist(NFL_table_clean$Home_EPA))) / (max(unlist(NFL_table_clean$Home_EPA)) - min(unlist(NFL_table_clean$Home_EPA)))
+              (value - min(unlist(agg$EPA))) / (max(unlist(agg$EPA)) - min(unlist(agg$EPA)))
             color <- off_rating_color(normalized)
             value <- format(value, nsmall = 1, digits = 1)
             ### Round corners of cell
@@ -488,9 +516,9 @@ table <-
           name = "EPA Allowed",
           cell = function(value) {
           ### Normalize team rating in order to assign color from color palette
-            normalized <- (value - min(unlist(NFL_table_clean$Home_EPA_Allowed))) / 
-              (max(unlist(NFL_table_clean$Home_EPA_Allowed)) - min(unlist(NFL_table_clean$Home_EPA_Allowed)))
-            
+            normalized <- (value - min(unlist(agg$EPA_allowed))) / 
+               (max(unlist(agg$EPA_allowed)) - min(unlist(agg$EPA_allowed)))
+            # 
             color <- def_rating_color(normalized)
             value <- format(value, nsmall = 1, digits = 1)
             ### Round corners of cell
@@ -636,8 +664,8 @@ table <-
           name = "EPA Allowed",
           cell = function(value) {
           ### Normalize team rating in order to assign color from color palette
-            normalized <- (value - min(unlist(NFL_table_clean$Away_EPA_Allowed))) / 
-              (max(unlist(NFL_table_clean$Away_EPA_Allowed)) - min(unlist(NFL_table_clean$Away_EPA_Allowed)))
+            normalized <- (value - min(unlist(agg$EPA_allowed))) / 
+              (max(unlist(agg$EPA_allowed)) - min(unlist(agg$EPA_allowed)))
             
             color <- def_rating_color(normalized)
             value <- format(value, nsmall = 1, digits = 1)
@@ -652,8 +680,7 @@ table <-
           name = "EPA",
           cell = function(value) {
           ### Normalize team rating in order to assign color from color palette
-            normalized <-
-              (value - min(unlist(NFL_table_clean$Away_EPA))) / (max(unlist(NFL_table_clean$Away_EPA)) - min(unlist(NFL_table_clean$Away_EPA)))
+            normalized <-(value - min(unlist(agg$EPA))) / (max(unlist(agg$EPA)) - min(unlist(agg$EPA)))
             color <- off_rating_color(normalized)
             value <- format(value, nsmall = 1, digits = 1)
             ### Round corners of cell

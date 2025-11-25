@@ -24,19 +24,19 @@ library(glue)
 library(gt)
 library(gtExtras)
 library(nflverse)
-load('2024_pbp_env.RData')
+#load('2024_pbp_env.RData'
 ```
 
 ```{r,include=FALSE}
-ht<-'SF'
-at<-'SEA'
+ht<-'PHI'
+at<-'KC'
 
 ```
 
 ```{r,echo=FALSE}
 
-#pbp <- load_pbp(c(2024))
-#pbp <- add_qb_epa(pbp)
+pbp <- load_pbp(c(2024))
+pbp <- add_qb_epa(pbp)
  
 df_off <- pbp %>%
   filter(season_type == "REG", down %in% c(1, 2, 3, 4), punt_attempt == 0) %>%

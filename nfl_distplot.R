@@ -120,15 +120,17 @@ data <- pbp %>%
 
 
 #----------------------------- NFC EPA -------------------------- #
-ggplot(data = data %>% filter(posteam %in% nfc$team_abbr), aes(x = epa,
+ggplot(data = data %>% filter(posteam %in% nfc$team_abbr), aes(x = OFF_EPA,
                                                             y = reorder(posteam,
-                                                            epa),
+                                                                        OFF_EPA),
                                                             fill = posteam)) +
   geom_density_ridges(quantile_lines = T,
                       quantile_fun = meansd,
                       color = "#d0d0d0") +
   nflplotR::scale_fill_nfl() +
-  scale_x_continuous(breaks = scales::pretty_breaks()) +
+  xlim(-5,5) + 
+  #scale_x_continuous(breaks = scales::pretty_breaks()) +
+  
   #nfl_analytics_theme() +
   xlab("EPA") +
   ylab("") +
@@ -136,6 +138,7 @@ ggplot(data = data %>% filter(posteam %in% nfc$team_abbr), aes(x = epa,
        subtitle = "NFC",
        caption = "Created By Harrison Eller
        Copyright: Statletics") +
+  #xlim(-5,5)
   theme(axis.text.y = element_nfl_logo(size = 1.25)) +
   theme(plot.title = element_text(family = "Trebuchet MS", face="bold", size=20, hjust=0)) +
   theme(plot.subtitle = element_text(family = "Trebuchet MS", face="bold", size=12, hjust=0)) 
@@ -143,15 +146,16 @@ ggplot(data = data %>% filter(posteam %in% nfc$team_abbr), aes(x = epa,
 
 
 #----------------------------- AFC EPA -------------------------- #
-ggplot(data = data %>% filter(posteam %in% afc$team_abbr), aes(x = epa,
+ggplot(data = data %>% filter(posteam %in% afc$team_abbr), aes(x = OFF_EPA,
                                                                y = reorder(posteam,
-                                                                           epa),
+                                                                           OFF_EPA),
                                                                fill = posteam)) +
   geom_density_ridges(quantile_lines = T,
                       quantile_fun = meansd,
                       color = "#d0d0d0") +
   nflplotR::scale_fill_nfl() +
-  scale_x_continuous(breaks = scales::pretty_breaks()) +
+  xlim(-5,5) + 
+  #scale_x_continuous(breaks = scales::pretty_breaks()) +
   #nfl_analytics_theme() +
   xlab("EPA") +
   ylab("") +

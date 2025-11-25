@@ -1593,17 +1593,8 @@ display: none;
 </div>
 
 
-<pre class="r"><code>week=18
+<pre class="r"><code>week=22
 xgb=TRUE</code></pre>
-<pre class="r"><code>### ypp model ###
-if (FALSE){
-ypp_proj&lt;-YPP(season=2024,week=week)
-rows &lt;- nrow(ypp_proj) 
-odd_rows &lt;- seq_len(rows) %% 2 
-# getting data from odd data frame 
-data_mod &lt;- ypp_proj[odd_rows == 1, ] 
-ypp_inp=TRUE
-}else(ypp_inp=FALSE)</code></pre>
 <pre><code>## [1] FALSE</code></pre>
 <pre class="python"><code>from points_model import nfl_model</code></pre>
 <pre><code>## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:324: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;1644.4452243772341&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
@@ -1617,102 +1608,7 @@ ypp_inp=TRUE
 ## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:304: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;1460.6706113362352&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
 ##   season.at[i,&#39;loser_elo&#39;] = team_ref.at[loser,&#39;elo&#39;][-1]
 ## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:305: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;171.83428803264974&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;elo_diff&#39;] = season.at[i,&#39;winner_elo&#39;] - season.at[i,&#39;loser_elo&#39;]
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:324: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;1644.4452243772341&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;winner_adj_elo&#39;] = season.at[i,&#39;winner_elo&#39;] + elo_adj
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:325: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;1583.5547756227659&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;loser_adj_elo&#39;] = season.at[i,&#39;loser_elo&#39;] - elo_adj
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:326: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;60.89044875446825&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;elo_adj_diff&#39;] = season.at[i,&#39;winner_adj_elo&#39;] - season.at[i,&#39;loser_adj_elo&#39;]
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:303: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;1632.504899368885&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;winner_elo&#39;] = team_ref.at[winner,&#39;elo&#39;][-1]
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:304: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;1460.6706113362352&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;loser_elo&#39;] = team_ref.at[loser,&#39;elo&#39;][-1]
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:305: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;171.83428803264974&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;elo_diff&#39;] = season.at[i,&#39;winner_elo&#39;] - season.at[i,&#39;loser_elo&#39;]
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:324: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;1500.4190822066623&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;winner_adj_elo&#39;] = season.at[i,&#39;winner_elo&#39;] + elo_adj
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:325: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;1379.5809177933377&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;loser_adj_elo&#39;] = season.at[i,&#39;loser_elo&#39;] - elo_adj
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:326: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;120.83816441332465&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;elo_adj_diff&#39;] = season.at[i,&#39;winner_adj_elo&#39;] - season.at[i,&#39;loser_adj_elo&#39;]
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:303: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;1736.764654892319&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;winner_elo&#39;] = team_ref.at[winner,&#39;elo&#39;][-1]
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:304: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;1535.6473518584876&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;loser_elo&#39;] = team_ref.at[loser,&#39;elo&#39;][-1]
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:305: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;201.11730303383138&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;elo_diff&#39;] = season.at[i,&#39;winner_elo&#39;] - season.at[i,&#39;loser_elo&#39;]
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:324: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;1761.9070846914606&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;winner_adj_elo&#39;] = season.at[i,&#39;winner_elo&#39;] + elo_adj
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:325: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;1730.0929153085394&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;loser_adj_elo&#39;] = season.at[i,&#39;loser_elo&#39;] - elo_adj
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:326: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;31.814169382921136&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;elo_adj_diff&#39;] = season.at[i,&#39;winner_adj_elo&#39;] - season.at[i,&#39;loser_adj_elo&#39;]
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:303: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;1731.8689725058637&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;winner_elo&#39;] = team_ref.at[winner,&#39;elo&#39;][-1]
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:304: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;1598.5002528682596&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;loser_elo&#39;] = team_ref.at[loser,&#39;elo&#39;][-1]
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:305: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;133.36871963760404&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;elo_diff&#39;] = season.at[i,&#39;winner_elo&#39;] - season.at[i,&#39;loser_elo&#39;]
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:324: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;1644.4452243772341&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;winner_adj_elo&#39;] = season.at[i,&#39;winner_elo&#39;] + elo_adj
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:325: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;1583.5547756227659&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;loser_adj_elo&#39;] = season.at[i,&#39;loser_elo&#39;] - elo_adj
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:326: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;60.89044875446825&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;elo_adj_diff&#39;] = season.at[i,&#39;winner_adj_elo&#39;] - season.at[i,&#39;loser_adj_elo&#39;]
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:303: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;1632.504899368885&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;winner_elo&#39;] = team_ref.at[winner,&#39;elo&#39;][-1]
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:304: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;1460.6706113362352&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;loser_elo&#39;] = team_ref.at[loser,&#39;elo&#39;][-1]
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:305: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;171.83428803264974&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;elo_diff&#39;] = season.at[i,&#39;winner_elo&#39;] - season.at[i,&#39;loser_elo&#39;]
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:324: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;1500.4190822066623&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;winner_adj_elo&#39;] = season.at[i,&#39;winner_elo&#39;] + elo_adj
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:325: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;1379.5809177933377&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;loser_adj_elo&#39;] = season.at[i,&#39;loser_elo&#39;] - elo_adj
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:326: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;120.83816441332465&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;elo_adj_diff&#39;] = season.at[i,&#39;winner_adj_elo&#39;] - season.at[i,&#39;loser_adj_elo&#39;]
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:303: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;1736.764654892319&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;winner_elo&#39;] = team_ref.at[winner,&#39;elo&#39;][-1]
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:304: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;1535.6473518584876&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;loser_elo&#39;] = team_ref.at[loser,&#39;elo&#39;][-1]
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:305: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;201.11730303383138&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;elo_diff&#39;] = season.at[i,&#39;winner_elo&#39;] - season.at[i,&#39;loser_elo&#39;]
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:324: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;1761.9070846914606&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;winner_adj_elo&#39;] = season.at[i,&#39;winner_elo&#39;] + elo_adj
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:325: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;1730.0929153085394&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;loser_adj_elo&#39;] = season.at[i,&#39;loser_elo&#39;] - elo_adj
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:326: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;31.814169382921136&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;elo_adj_diff&#39;] = season.at[i,&#39;winner_adj_elo&#39;] - season.at[i,&#39;loser_adj_elo&#39;]
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:303: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;1731.8689725058637&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;winner_elo&#39;] = team_ref.at[winner,&#39;elo&#39;][-1]
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:304: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;1598.5002528682596&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;loser_elo&#39;] = team_ref.at[loser,&#39;elo&#39;][-1]
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:305: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;133.36871963760404&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   season.at[i,&#39;elo_diff&#39;] = season.at[i,&#39;winner_elo&#39;] - season.at[i,&#39;loser_elo&#39;]
-##   0%|          | 0/3 [00:00&lt;?, ?it/s] 33%|###3      | 1/3 [00:00&lt;00:01,  1.35it/s] 67%|######6   | 2/3 [00:01&lt;00:00,  1.32it/s]100%|##########| 3/3 [00:02&lt;00:00,  1.32it/s]100%|##########| 3/3 [00:02&lt;00:00,  1.32it/s]
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/points_model.py:265: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;1536.3293886637648&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
-##   pbp.loc[play,&#39;elo&#39;] = team_ref_2022.loc[pbp.loc[play,&#39;posteam&#39;],&#39;elo&#39;][int(pbp.loc[play,&#39;week&#39;])-1]
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/points_model.py:325: FutureWarning: The behavior of array concatenation with empty entries is deprecated. In a future version, this will no longer exclude empty items when determining the result dtype. To retain the old behavior, exclude the empty entries before the concat operation.
-##   data = pd.concat([data,temp])
-## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/points_model.py:325: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.
-##   data = pd.concat([data,temp])
-## custom ypp input received
-## custom ypp input received
-## custom ypp input received
-## custom ypp input received
-## custom ypp input received
-## custom ypp input received
-## custom ypp input received
-## custom ypp input received
-## custom ypp input received
-## custom ypp input received
-## custom ypp input received
-## custom ypp input received
-## custom ypp input received
-## custom ypp input received
-## custom ypp input received
-## custom ypp input received</code></pre>
+##   season.at[i,&#39;elo_diff&#39;] = season.at[i,&#39;winner_elo&#39;] - season.at[i,&#39;loser_elo&#39;]</code></pre>
 <pre class="python"><code>from nfl_game_projections import *
 import pandas as pd
 
@@ -1796,28 +1692,13 @@ projections = nfl_model().projections(week=int(r.week))</code></pre>
 ##   season.at[i,&#39;loser_elo&#39;] = team_ref.at[loser,&#39;elo&#39;][-1]
 ## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/nfl_dev.py:305: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;133.36871963760404&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
 ##   season.at[i,&#39;elo_diff&#39;] = season.at[i,&#39;winner_elo&#39;] - season.at[i,&#39;loser_elo&#39;]
-##   0%|          | 0/3 [00:00&lt;?, ?it/s] 33%|###3      | 1/3 [00:00&lt;00:01,  1.72it/s] 67%|######6   | 2/3 [00:01&lt;00:00,  1.57it/s]100%|##########| 3/3 [00:01&lt;00:00,  1.57it/s]100%|##########| 3/3 [00:01&lt;00:00,  1.58it/s]
+##   0%|          | 0/3 [00:00&lt;?, ?it/s] 33%|###3      | 1/3 [00:00&lt;00:01,  1.29it/s] 67%|######6   | 2/3 [00:01&lt;00:00,  1.34it/s]100%|##########| 3/3 [00:02&lt;00:00,  1.38it/s]100%|##########| 3/3 [00:02&lt;00:00,  1.36it/s]
 ## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/points_model.py:265: FutureWarning: Setting an item of incompatible dtype is deprecated and will raise in a future error of pandas. Value &#39;1536.3293886637648&#39; has dtype incompatible with int64, please explicitly cast to a compatible dtype first.
 ##   pbp.loc[play,&#39;elo&#39;] = team_ref_2022.loc[pbp.loc[play,&#39;posteam&#39;],&#39;elo&#39;][int(pbp.loc[play,&#39;week&#39;])-1]
 ## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/points_model.py:325: FutureWarning: The behavior of array concatenation with empty entries is deprecated. In a future version, this will no longer exclude empty items when determining the result dtype. To retain the old behavior, exclude the empty entries before the concat operation.
 ##   data = pd.concat([data,temp])
 ## /Users/HarrisonEller/Documents/Statletics/Repositories/NFL_Analytics/points_model.py:325: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.
 ##   data = pd.concat([data,temp])
-## custom ypp input received
-## custom ypp input received
-## custom ypp input received
-## custom ypp input received
-## custom ypp input received
-## custom ypp input received
-## custom ypp input received
-## custom ypp input received
-## custom ypp input received
-## custom ypp input received
-## custom ypp input received
-## custom ypp input received
-## custom ypp input received
-## custom ypp input received
-## custom ypp input received
 ## custom ypp input received</code></pre>
 <pre class="python"><code>
 r.projections = projections</code></pre>
@@ -1842,45 +1723,17 @@ colnames(proj)[3]&lt;-&quot;away_score&quot;
 colnames(proj)[4]&lt;-&quot;away_score&quot;
 }
 proj$home_score = as.numeric(proj$home_score);proj$away_score = as.numeric(proj$away_score)</code></pre>
-<pre class="r"><code>ypp_inp = FALSE
-proj[&#39;home_ypp&#39;]=0
-proj[&#39;away_ypp&#39;]=0
-
-for (game in 1:nrow(proj)){
-    sched &lt;- schedule %&gt;% 
-      filter(home_team==proj$home[game] &amp; away_team==proj$away[game])
-    
-    proj$home_score[game]&lt;-(proj$home_score[game] + sched$home_total)/2
-    proj$away_score[game]&lt;-(proj$away_score[game] + sched$away_total)/2
-    
-    if (ypp_inp == FALSE){
-
-    proj$home_ypp[game]&lt;- df_off$ypp[which(df_off$posteam == proj$home[game])] 
-    proj$away_ypp[game]&lt;-df_off$ypp[which(df_off$posteam == proj$away[game])] 
-
-    }
-}</code></pre>
-<pre class="r"><code>################ EPA scrape ###############
-
-info &lt;- nflfastR::teams_colors_logos
-nfc &lt;- info %&gt;%
-  filter(team_conf == &quot;NFC&quot;)
-afc &lt;- info %&gt;%
-  filter(team_conf == &quot;AFC&quot;)
-### creating function to add SD, mean, and mean + sd
-meansd &lt;- function(x, ...) {
-  mean &lt;- mean(x)
-  sd &lt;- sd(x)
-  c(mean - sd, mean, mean + sd)
-}
-
-pbp &lt;- load_pbp(c(2024))
-pbp&lt;- clean_pbp(pbp)</code></pre>
-<pre><code>## • 11:10:45 | Cleaning up play-by-play...</code></pre>
-<pre><code>## ✔ 11:10:48 | Cleaning completed</code></pre>
-<pre class="r"><code>pbp &lt;- add_qb_epa(pbp)</code></pre>
-<pre><code>## ✔ 11:10:48 | added qb_epa</code></pre>
-<pre class="r"><code>factor(pbp$posteam)</code></pre>
+<pre><code>## • 09:13:50 | Cleaning up play-by-play...</code></pre>
+<pre><code>## ✔ 09:13:53 | Cleaning completed</code></pre>
+<pre><code>## [09:13:54] WARNING: src/learner.cc:553: 
+##   If you are loading a serialized model (like pickle in Python, RDS in R) generated by
+##   older XGBoost, please export the model by calling `Booster.save_model` from that version
+##   first, then load it back in current version. See:
+## 
+##     https://xgboost.readthedocs.io/en/latest/tutorials/saving_model.html
+## 
+##   for more details about differences between saving model and serializing.</code></pre>
+<pre><code>## ✔ 09:13:54 | added qb_epa</code></pre>
 <pre><code>##     [1] &lt;NA&gt; ARI  ARI  ARI  ARI  ARI  ARI  ARI  ARI  ARI  ARI  ARI  ARI  ARI 
 ##    [15] ARI  ARI  BUF  BUF  BUF  BUF  BUF  ARI  ARI  ARI  ARI  ARI  ARI  ARI 
 ##    [29] ARI  ARI  ARI  ARI  BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF 
@@ -5058,99 +4911,358 @@ pbp&lt;- clean_pbp(pbp)</code></pre>
 ## [44437] JAX  JAX  JAX  JAX  JAX  JAX  JAX  JAX  JAX  JAX  JAX  JAX  JAX  JAX 
 ## [44451] JAX  JAX  JAX  JAX  JAX  JAX  TEN  TEN  TEN  TEN  TEN  TEN  TEN  TEN 
 ## [44465] TEN  TEN  TEN  TEN  TEN  TEN  JAX  JAX  &lt;NA&gt; JAX  &lt;NA&gt; JAX  &lt;NA&gt; JAX 
-## [44479] TEN  TEN  TEN  TEN  TEN  TEN  TEN  TEN  &lt;NA&gt; TEN  JAX  JAX 
+## [44479] TEN  TEN  TEN  TEN  TEN  TEN  TEN  TEN  &lt;NA&gt; TEN  JAX  JAX  &lt;NA&gt; NE  
+## [44493] NE   NE   NE   NE   NE   BUF  BUF  BUF  BUF  NE   NE   NE   NE   NE  
+## [44507] NE   NE   NE   NE   NE   NE   NE   NE   NE   BUF  BUF  BUF  BUF  BUF 
+## [44521] BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF  NE   NE   NE  
+## [44535] NE   NE   NE   NE   NE   BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF 
+## [44549] BUF  NE   NE   NE   NE   NE   NE   NE   NE   NE   BUF  BUF  BUF  BUF 
+## [44563] &lt;NA&gt; BUF  BUF  &lt;NA&gt; BUF  BUF  BUF  &lt;NA&gt; &lt;NA&gt; BUF  BUF  &lt;NA&gt; BUF  BUF 
+## [44577] BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF  NE   NE   BUF  BUF  BUF 
+## [44591] BUF  BUF  BUF  NE   NE   NE   NE   NE   NE   NE   NE   NE   NE   NE  
+## [44605] NE   NE   NE   &lt;NA&gt; NE   NE   BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF 
+## [44619] NE   NE   NE   NE   NE   NE   NE   NE   NE   NE   NE   BUF  BUF  BUF 
+## [44633] BUF  &lt;NA&gt; BUF  BUF  BUF  BUF  NE   NE   NE   NE   BUF  BUF  BUF  BUF 
+## [44647] NE   &lt;NA&gt; NE   NE   &lt;NA&gt; NE   NE   NE   BUF  BUF  BUF  BUF  BUF  NE  
+## [44661] NE   NE   NE   &lt;NA&gt; ATL  ATL  ATL  ATL  ATL  ATL  ATL  ATL  ATL  ATL 
+## [44675] ATL  ATL  ATL  CAR  CAR  CAR  CAR  CAR  CAR  CAR  CAR  CAR  ATL  ATL 
+## [44689] ATL  ATL  ATL  ATL  ATL  ATL  ATL  ATL  ATL  ATL  CAR  CAR  CAR  CAR 
+## [44703] CAR  CAR  CAR  CAR  CAR  CAR  CAR  CAR  CAR  ATL  ATL  ATL  ATL  ATL 
+## [44717] ATL  ATL  ATL  ATL  ATL  ATL  ATL  CAR  CAR  CAR  CAR  CAR  CAR  CAR 
+## [44731] ATL  ATL  ATL  ATL  ATL  &lt;NA&gt; ATL  ATL  ATL  CAR  CAR  CAR  &lt;NA&gt; CAR 
+## [44745] CAR  CAR  ATL  &lt;NA&gt; ATL  ATL  ATL  &lt;NA&gt; ATL  ATL  ATL  CAR  CAR  &lt;NA&gt;
+## [44759] CAR  CAR  CAR  CAR  CAR  ATL  ATL  ATL  CAR  CAR  CAR  CAR  CAR  ATL 
+## [44773] ATL  ATL  ATL  ATL  ATL  ATL  ATL  ATL  CAR  CAR  &lt;NA&gt; CAR  CAR  CAR 
+## [44787] CAR  CAR  CAR  CAR  CAR  ATL  ATL  ATL  ATL  ATL  ATL  ATL  ATL  ATL 
+## [44801] ATL  ATL  ATL  ATL  ATL  ATL  ATL  ATL  CAR  CAR  CAR  CAR  CAR  CAR 
+## [44815] CAR  CAR  CAR  CAR  CAR  CAR  ATL  ATL  ATL  ATL  ATL  ATL  ATL  ATL 
+## [44829] ATL  ATL  ATL  ATL  ATL  CAR  CAR  CAR  CAR  CAR  &lt;NA&gt; ATL  &lt;NA&gt; CAR 
+## [44843] CAR  CAR  CAR  CAR  CAR  CAR  CAR  CAR  CAR  &lt;NA&gt; CAR  ATL  &lt;NA&gt; GB  
+## [44857] GB   GB   GB   GB   GB   GB   CHI  CHI  CHI  CHI  GB   GB   GB   GB  
+## [44871] GB   GB   GB   CHI  GB   GB   GB   GB   GB   GB   GB   GB   GB   GB  
+## [44885] CHI  CHI  CHI  CHI  CHI  CHI  GB   CHI  CHI  CHI  CHI  CHI  GB   GB  
+## [44899] GB   GB   GB   GB   GB   GB   GB   GB   GB   CHI  CHI  CHI  CHI  CHI 
+## [44913] CHI  CHI  CHI  GB   GB   GB   GB   GB   GB   GB   GB   GB   GB   GB  
+## [44927] CHI  CHI  CHI  CHI  CHI  CHI  CHI  &lt;NA&gt; CHI  CHI  GB   &lt;NA&gt; CHI  CHI 
+## [44941] CHI  CHI  CHI  CHI  CHI  CHI  CHI  GB   GB   GB   GB   GB   CHI  CHI 
+## [44955] CHI  CHI  CHI  CHI  CHI  CHI  GB   GB   GB   GB   GB   GB   GB   GB  
+## [44969] GB   CHI  CHI  &lt;NA&gt; CHI  CHI  CHI  CHI  CHI  CHI  CHI  CHI  GB   GB  
+## [44983] GB   GB   GB   GB   CHI  CHI  &lt;NA&gt; CHI  CHI  GB   GB   GB   GB   GB  
+## [44997] GB   CHI  CHI  CHI  CHI  CHI  CHI  CHI  CHI  GB   GB   GB   &lt;NA&gt; GB  
+## [45011] CHI  CHI  CHI  CHI  &lt;NA&gt; CHI  CHI  &lt;NA&gt; CHI  CHI  CHI  GB   &lt;NA&gt; CIN 
+## [45025] CIN  CIN  CIN  CIN  CIN  CIN  CIN  CIN  CIN  CIN  PIT  PIT  PIT  PIT 
+## [45039] PIT  CIN  CIN  CIN  CIN  CIN  CIN  CIN  CIN  CIN  CIN  CIN  PIT  PIT 
+## [45053] PIT  PIT  PIT  PIT  PIT  PIT  PIT  PIT  PIT  PIT  PIT  PIT  PIT  PIT 
+## [45067] PIT  PIT  CIN  CIN  CIN  CIN  CIN  CIN  CIN  CIN  PIT  PIT  PIT  PIT 
+## [45081] CIN  CIN  CIN  CIN  CIN  CIN  CIN  CIN  &lt;NA&gt; CIN  CIN  CIN  CIN  PIT 
+## [45095] PIT  PIT  PIT  PIT  &lt;NA&gt; PIT  CIN  &lt;NA&gt; CIN  &lt;NA&gt; CIN  CIN  CIN  CIN 
+## [45109] CIN  PIT  PIT  &lt;NA&gt; PIT  PIT  PIT  PIT  PIT  CIN  CIN  CIN  CIN  CIN 
+## [45123] CIN  CIN  CIN  CIN  CIN  CIN  PIT  PIT  PIT  PIT  PIT  PIT  PIT  CIN 
+## [45137] CIN  CIN  CIN  CIN  CIN  CIN  CIN  CIN  CIN  &lt;NA&gt; CIN  CIN  CIN  CIN 
+## [45151] &lt;NA&gt; CIN  CIN  PIT  PIT  PIT  PIT  PIT  PIT  PIT  PIT  PIT  PIT  PIT 
+## [45165] CIN  CIN  CIN  CIN  CIN  CIN  CIN  PIT  PIT  PIT  PIT  PIT  PIT  PIT 
+## [45179] PIT  PIT  PIT  PIT  CIN  CIN  &lt;NA&gt; CIN  &lt;NA&gt; CIN  CIN  PIT  PIT  PIT 
+## [45193] PIT  PIT  &lt;NA&gt; PIT  &lt;NA&gt; PIT  CIN  CIN  &lt;NA&gt; CLE  CLE  CLE  CLE  CLE 
+## [45207] CLE  BAL  BAL  BAL  BAL  BAL  BAL  BAL  CLE  CLE  BAL  CLE  CLE  CLE 
+## [45221] CLE  CLE  BAL  BAL  BAL  BAL  BAL  &lt;NA&gt; BAL  CLE  CLE  CLE  CLE  CLE 
+## [45235] CLE  CLE  CLE  BAL  BAL  BAL  BAL  BAL  BAL  BAL  BAL  BAL  CLE  CLE 
+## [45249] CLE  CLE  CLE  CLE  &lt;NA&gt; CLE  CLE  CLE  CLE  CLE  BAL  BAL  BAL  BAL 
+## [45263] BAL  BAL  BAL  BAL  BAL  CLE  CLE  CLE  CLE  CLE  BAL  BAL  BAL  &lt;NA&gt;
+## [45277] BAL  &lt;NA&gt; BAL  BAL  BAL  BAL  &lt;NA&gt; BAL  BAL  &lt;NA&gt; BAL  BAL  BAL  BAL 
+## [45291] BAL  BAL  BAL  BAL  BAL  BAL  CLE  CLE  CLE  CLE  CLE  BAL  BAL  BAL 
+## [45305] BAL  BAL  BAL  BAL  BAL  BAL  BAL  CLE  CLE  CLE  CLE  CLE  CLE  BAL 
+## [45319] BAL  BAL  BAL  CLE  CLE  CLE  CLE  CLE  CLE  CLE  CLE  CLE  CLE  CLE 
+## [45333] CLE  CLE  CLE  CLE  CLE  CLE  BAL  BAL  BAL  BAL  BAL  BAL  BAL  BAL 
+## [45347] BAL  BAL  BAL  CLE  CLE  CLE  CLE  CLE  CLE  BAL  BAL  BAL  BAL  CLE 
+## [45361] CLE  CLE  CLE  BAL  BAL  BAL  &lt;NA&gt; BAL  CLE  CLE  &lt;NA&gt; HOU  HOU  HOU 
+## [45375] HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU  TEN  TEN  TEN 
+## [45389] TEN  TEN  HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU  TEN  TEN  TEN 
+## [45403] TEN  TEN  TEN  TEN  HOU  HOU  TEN  TEN  TEN  TEN  TEN  TEN  HOU  HOU 
+## [45417] HOU  HOU  TEN  TEN  TEN  TEN  HOU  HOU  HOU  HOU  HOU  TEN  TEN  TEN 
+## [45431] TEN  TEN  TEN  TEN  TEN  TEN  TEN  TEN  &lt;NA&gt; TEN  HOU  HOU  HOU  HOU 
+## [45445] &lt;NA&gt; HOU  HOU  HOU  HOU  &lt;NA&gt; &lt;NA&gt; HOU  &lt;NA&gt; TEN  TEN  TEN  TEN  TEN 
+## [45459] TEN  TEN  TEN  TEN  TEN  TEN  TEN  TEN  TEN  HOU  HOU  HOU  HOU  HOU 
+## [45473] HOU  HOU  HOU  HOU  HOU  HOU  HOU  &lt;NA&gt; HOU  HOU  TEN  TEN  TEN  TEN 
+## [45487] TEN  TEN  TEN  HOU  TEN  TEN  TEN  TEN  TEN  TEN  TEN  TEN  HOU  HOU 
+## [45501] HOU  HOU  TEN  TEN  TEN  TEN  HOU  HOU  HOU  HOU  HOU  HOU  TEN  TEN 
+## [45515] TEN  TEN  TEN  TEN  TEN  TEN  TEN  TEN  HOU  HOU  &lt;NA&gt; HOU  &lt;NA&gt; HOU 
+## [45529] &lt;NA&gt; HOU  HOU  &lt;NA&gt; HOU  HOU  HOU  &lt;NA&gt; IND  IND  IND  IND  IND  JAX 
+## [45543] JAX  JAX  JAX  JAX  JAX  JAX  JAX  JAX  JAX  JAX  JAX  JAX  IND  IND 
+## [45557] IND  IND  IND  IND  JAX  JAX  JAX  JAX  IND  IND  IND  IND  IND  JAX 
+## [45571] JAX  JAX  JAX  JAX  JAX  JAX  IND  IND  IND  IND  IND  IND  IND  IND 
+## [45585] IND  IND  JAX  JAX  JAX  JAX  JAX  IND  IND  IND  IND  IND  IND  IND 
+## [45599] IND  IND  IND  IND  JAX  JAX  JAX  JAX  JAX  JAX  &lt;NA&gt; JAX  &lt;NA&gt; JAX 
+## [45613] JAX  JAX  IND  IND  IND  IND  IND  IND  IND  IND  IND  JAX  JAX  &lt;NA&gt;
+## [45627] JAX  JAX  JAX  JAX  JAX  JAX  JAX  JAX  IND  IND  IND  IND  IND  JAX 
+## [45641] JAX  JAX  JAX  JAX  IND  IND  IND  IND  IND  IND  IND  IND  IND  IND 
+## [45655] IND  JAX  JAX  JAX  JAX  IND  IND  IND  IND  IND  IND  IND  IND  JAX 
+## [45669] JAX  JAX  JAX  JAX  JAX  JAX  JAX  JAX  JAX  JAX  JAX  JAX  JAX  JAX 
+## [45683] JAX  JAX  IND  IND  IND  IND  IND  IND  IND  IND  IND  JAX  JAX  JAX 
+## [45697] JAX  JAX  JAX  JAX  JAX  IND  IND  IND  IND  &lt;NA&gt; IND  IND  IND  &lt;NA&gt;
+## [45711] IND  JAX  &lt;NA&gt; IND  IND  IND  IND  IND  IND  IND  IND  IND  IND  IND 
+## [45725] IND  JAX  JAX  JAX  JAX  &lt;NA&gt; JAX  IND  &lt;NA&gt; DEN  DEN  DEN  DEN  DEN 
+## [45739] DEN  DEN  DEN  DEN  KC   KC   KC   KC   KC   DEN  DEN  DEN  DEN  DEN 
+## [45753] DEN  DEN  DEN  DEN  DEN  DEN  KC   KC   KC   KC   KC   KC   KC   DEN 
+## [45767] DEN  DEN  DEN  DEN  DEN  DEN  DEN  DEN  DEN  DEN  DEN  &lt;NA&gt; DEN  DEN 
+## [45781] &lt;NA&gt; DEN  DEN  DEN  DEN  DEN  DEN  DEN  KC   KC   KC   KC   KC   KC  
+## [45795] KC   KC   KC   KC   KC   KC   KC   DEN  DEN  DEN  DEN  &lt;NA&gt; DEN  KC  
+## [45809] &lt;NA&gt; KC   KC   KC   KC   KC   KC   DEN  DEN  DEN  DEN  DEN  DEN  KC  
+## [45823] KC   KC   KC   DEN  DEN  DEN  DEN  DEN  DEN  DEN  DEN  DEN  DEN  DEN 
+## [45837] DEN  KC   KC   KC   KC   KC   KC   DEN  DEN  DEN  DEN  DEN  DEN  DEN 
+## [45851] DEN  DEN  DEN  DEN  DEN  KC   KC   KC   &lt;NA&gt; KC   KC   DEN  DEN  DEN 
+## [45865] DEN  DEN  DEN  DEN  DEN  DEN  DEN  DEN  KC   KC   KC   &lt;NA&gt; LV   LV  
+## [45879] LV   LV   LV   LAC  LAC  LAC  LAC  LV   LV   &lt;NA&gt; LV   LV   LAC  LAC 
+## [45893] LAC  LAC  LAC  LAC  LAC  LAC  LV   LV   LV   LV   LV   LV   LV   LAC 
+## [45907] LAC  LAC  LAC  LAC  LAC  LAC  LV   LV   LV   LV   LV   LV   LV   LV  
+## [45921] LV   LAC  LAC  LAC  LAC  &lt;NA&gt; &lt;NA&gt; LAC  LAC  LAC  LAC  LAC  LAC  LAC 
+## [45935] LAC  LAC  LAC  LAC  LAC  LAC  LAC  LV   LV   LV   LV   LV   LAC  LAC 
+## [45949] LAC  LAC  LAC  LAC  LAC  &lt;NA&gt; LAC  LAC  LV   LV   LV   LAC  &lt;NA&gt; LAC 
+## [45963] LAC  LAC  LAC  LV   LV   &lt;NA&gt; LAC  LAC  LAC  LAC  LAC  LAC  LAC  LAC 
+## [45977] LAC  LAC  LAC  LAC  LAC  LAC  LAC  LAC  LV   LV   LV   LV   LV   LV  
+## [45991] LV   LV   LV   LV   LAC  LAC  LAC  LAC  LAC  LAC  LAC  LAC  LAC  LAC 
+## [46005] LAC  LV   LV   LV   LV   LV   LV   LV   &lt;NA&gt; LV   LAC  LAC  LAC  LAC 
+## [46019] LAC  LAC  &lt;NA&gt; LAC  LAC  LAC  LAC  LAC  &lt;NA&gt; LAC  LAC  LV   LV   LV  
+## [46033] LV   LV   LV   LV   LV   LV   &lt;NA&gt; LV   LV   LV   LV   LV   LAC  LAC 
+## [46047] LAC  &lt;NA&gt; MIA  MIA  MIA  MIA  MIA  NYJ  MIA  MIA  MIA  MIA  NYJ  NYJ 
+## [46061] NYJ  NYJ  NYJ  NYJ  MIA  MIA  MIA  MIA  MIA  NYJ  NYJ  NYJ  NYJ  NYJ 
+## [46075] MIA  MIA  MIA  MIA  MIA  MIA  MIA  MIA  MIA  MIA  MIA  NYJ  NYJ  NYJ 
+## [46089] NYJ  NYJ  NYJ  NYJ  MIA  MIA  MIA  MIA  NYJ  NYJ  NYJ  NYJ  NYJ  NYJ 
+## [46103] NYJ  NYJ  NYJ  MIA  MIA  MIA  NYJ  NYJ  NYJ  NYJ  NYJ  NYJ  NYJ  NYJ 
+## [46117] NYJ  MIA  MIA  MIA  MIA  NYJ  NYJ  &lt;NA&gt; NYJ  NYJ  MIA  MIA  &lt;NA&gt; MIA 
+## [46131] &lt;NA&gt; MIA  MIA  NYJ  &lt;NA&gt; NYJ  NYJ  NYJ  NYJ  NYJ  NYJ  MIA  MIA  MIA 
+## [46145] MIA  NYJ  NYJ  NYJ  NYJ  NYJ  NYJ  NYJ  NYJ  NYJ  NYJ  NYJ  MIA  MIA 
+## [46159] MIA  MIA  MIA  MIA  MIA  MIA  MIA  MIA  MIA  MIA  MIA  MIA  MIA  MIA 
+## [46173] MIA  MIA  NYJ  NYJ  NYJ  NYJ  NYJ  NYJ  NYJ  NYJ  NYJ  MIA  MIA  MIA 
+## [46187] MIA  MIA  &lt;NA&gt; MIA  MIA  MIA  MIA  MIA  MIA  MIA  MIA  MIA  NYJ  NYJ 
+## [46201] NYJ  NYJ  NYJ  NYJ  &lt;NA&gt; NYJ  NYJ  NYJ  &lt;NA&gt; NYJ  NYJ  MIA  MIA  MIA 
+## [46215] MIA  MIA  MIA  MIA  &lt;NA&gt; MIA  MIA  MIA  MIA  &lt;NA&gt; DET  DET  DET  DET 
+## [46229] DET  DET  DET  DET  MIN  MIN  MIN  MIN  MIN  MIN  MIN  MIN  MIN  MIN 
+## [46243] DET  DET  DET  DET  DET  DET  &lt;NA&gt; DET  DET  DET  DET  DET  MIN  MIN 
+## [46257] MIN  MIN  MIN  DET  DET  DET  DET  DET  DET  MIN  MIN  MIN  MIN  MIN 
+## [46271] MIN  MIN  MIN  MIN  DET  DET  DET  DET  DET  DET  DET  MIN  MIN  MIN 
+## [46285] MIN  DET  DET  DET  DET  DET  DET  DET  MIN  MIN  MIN  MIN  MIN  MIN 
+## [46299] MIN  &lt;NA&gt; MIN  MIN  DET  DET  DET  &lt;NA&gt; &lt;NA&gt; DET  &lt;NA&gt; MIN  MIN  MIN 
+## [46313] MIN  MIN  MIN  MIN  MIN  MIN  MIN  DET  MIN  MIN  MIN  MIN  MIN  MIN 
+## [46327] DET  DET  DET  DET  DET  DET  DET  DET  DET  DET  DET  DET  DET  DET 
+## [46341] DET  DET  MIN  MIN  MIN  MIN  MIN  MIN  MIN  DET  DET  DET  DET  DET 
+## [46355] DET  DET  DET  MIN  MIN  MIN  MIN  MIN  MIN  MIN  MIN  DET  DET  DET 
+## [46369] DET  DET  DET  DET  DET  DET  MIN  MIN  MIN  MIN  MIN  MIN  MIN  MIN 
+## [46383] MIN  MIN  MIN  DET  DET  DET  &lt;NA&gt; DET  DET  DET  DET  MIN  MIN  &lt;NA&gt;
+## [46397] NO   NO   NO   NO   NO   NO   NO   NO   NO   NO   NO   NO   TB   TB  
+## [46411] TB   TB   TB   TB   TB   TB   TB   TB   TB   NO   NO   NO   NO   NO  
+## [46425] NO   NO   NO   NO   NO   NO   NO   NO   NO   NO   TB   TB   TB   TB  
+## [46439] TB   NO   NO   NO   NO   NO   NO   NO   NO   &lt;NA&gt; NO   NO   &lt;NA&gt; NO  
+## [46453] NO   NO   NO   NO   TB   TB   TB   TB   TB   TB   TB   TB   TB   TB  
+## [46467] TB   &lt;NA&gt; TB   TB   TB   NO   NO   NO   NO   NO   NO   &lt;NA&gt; NO   NO  
+## [46481] NO   NO   NO   TB   TB   &lt;NA&gt; TB   TB   TB   TB   TB   TB   TB   TB  
+## [46495] TB   TB   TB   TB   NO   NO   NO   NO   NO   TB   TB   TB   TB   NO  
+## [46509] NO   NO   NO   TB   TB   TB   TB   TB   NO   NO   NO   NO   TB   TB  
+## [46523] TB   TB   TB   TB   TB   TB   TB   TB   TB   TB   TB   &lt;NA&gt; TB   TB  
+## [46537] TB   TB   NO   NO   NO   &lt;NA&gt; NO   NO   NO   NO   NO   TB   TB   TB  
+## [46551] TB   TB   TB   TB   TB   TB   TB   TB   TB   TB   TB   NO   NO   NO  
+## [46565] NO   &lt;NA&gt; NO   NO   NO   NO   NO   &lt;NA&gt; TB   TB   &lt;NA&gt; NYG  NYG  NYG 
+## [46579] NYG  NYG  NYG  NYG  NYG  NYG  NYG  NYG  NYG  PHI  PHI  PHI  PHI  PHI 
+## [46593] NYG  NYG  NYG  NYG  NYG  PHI  PHI  PHI  PHI  PHI  PHI  PHI  PHI  PHI 
+## [46607] PHI  PHI  PHI  PHI  PHI  PHI  PHI  NYG  NYG  NYG  NYG  NYG  NYG  NYG 
+## [46621] NYG  NYG  NYG  NYG  NYG  PHI  PHI  PHI  PHI  PHI  &lt;NA&gt; PHI  PHI  PHI 
+## [46635] PHI  PHI  PHI  &lt;NA&gt; PHI  PHI  NYG  NYG  NYG  NYG  &lt;NA&gt; NYG  PHI  PHI 
+## [46649] &lt;NA&gt; PHI  &lt;NA&gt; PHI  PHI  PHI  PHI  &lt;NA&gt; PHI  PHI  PHI  PHI  PHI  NYG 
+## [46663] NYG  NYG  NYG  NYG  NYG  NYG  NYG  NYG  NYG  PHI  PHI  PHI  PHI  PHI 
+## [46677] NYG  NYG  NYG  NYG  PHI  PHI  PHI  PHI  PHI  PHI  PHI  PHI  PHI  NYG 
+## [46691] NYG  NYG  NYG  NYG  NYG  NYG  NYG  NYG  NYG  PHI  PHI  PHI  PHI  PHI 
+## [46705] NYG  NYG  NYG  NYG  NYG  NYG  PHI  PHI  PHI  PHI  PHI  PHI  PHI  PHI 
+## [46719] PHI  PHI  PHI  PHI  &lt;NA&gt; PHI  &lt;NA&gt; PHI  PHI  &lt;NA&gt; PHI  &lt;NA&gt; PHI  &lt;NA&gt;
+## [46733] PHI  NYG  NYG  NYG  NYG  PHI  PHI  &lt;NA&gt; LA   LA   LA   LA   LA   LA  
+## [46747] LA   SEA  SEA  SEA  SEA  SEA  SEA  LA   LA   LA   LA   SEA  SEA  SEA 
+## [46761] SEA  SEA  SEA  SEA  LA   LA   LA   LA   &lt;NA&gt; LA   LA   LA   LA   &lt;NA&gt;
+## [46775] LA   LA   SEA  SEA  SEA  SEA  SEA  SEA  SEA  SEA  SEA  SEA  LA   LA  
+## [46789] LA   LA   LA   LA   LA   LA   LA   LA   SEA  SEA  SEA  SEA  SEA  SEA 
+## [46803] SEA  SEA  SEA  SEA  LA   LA   LA   LA   SEA  SEA  SEA  SEA  SEA  LA  
+## [46817] LA   LA   LA   LA   &lt;NA&gt; SEA  SEA  SEA  SEA  SEA  LA   LA   LA   LA  
+## [46831] LA   LA   LA   LA   LA   SEA  SEA  SEA  SEA  SEA  SEA  SEA  SEA  SEA 
+## [46845] SEA  SEA  SEA  LA   LA   LA   LA   LA   LA   LA   LA   LA   LA   LA  
+## [46859] LA   SEA  SEA  SEA  SEA  SEA  LA   LA   LA   LA   LA   LA   LA   SEA 
+## [46873] SEA  SEA  SEA  SEA  SEA  SEA  SEA  SEA  SEA  SEA  LA   LA   LA   LA  
+## [46887] LA   LA   LA   LA   LA   LA   LA   &lt;NA&gt; LA   &lt;NA&gt; &lt;NA&gt; LA   SEA  SEA 
+## [46901] &lt;NA&gt; SF   SF   SF   SF   SF   SF   SF   ARI  ARI  ARI  ARI  ARI  ARI 
+## [46915] ARI  SF   SF   SF   SF   SF   SF   SF   SF   SF   SF   SF   SF   SF  
+## [46929] SF   ARI  ARI  ARI  ARI  ARI  ARI  ARI  ARI  ARI  SF   SF   SF   SF  
+## [46943] ARI  ARI  ARI  ARI  ARI  ARI  ARI  ARI  ARI  SF   SF   SF   SF   SF  
+## [46957] ARI  ARI  ARI  ARI  SF   SF   SF   SF   SF   SF   SF   SF   SF   SF  
+## [46971] ARI  ARI  ARI  ARI  ARI  ARI  ARI  ARI  ARI  ARI  ARI  SF   SF   SF  
+## [46985] SF   SF   SF   &lt;NA&gt; SF   &lt;NA&gt; SF   SF   SF   SF   SF   ARI  ARI  &lt;NA&gt;
+## [46999] ARI  &lt;NA&gt; ARI  &lt;NA&gt; ARI  &lt;NA&gt; ARI  ARI  ARI  ARI  ARI  SF   SF   SF  
+## [47013] SF   ARI  ARI  ARI  ARI  ARI  ARI  ARI  ARI  ARI  SF   SF   SF   SF  
+## [47027] SF   SF   SF   SF   SF   ARI  ARI  ARI  ARI  ARI  ARI  ARI  ARI  ARI 
+## [47041] ARI  ARI  ARI  ARI  SF   SF   SF   SF   SF   SF   SF   SF   SF   SF  
+## [47055] ARI  ARI  ARI  ARI  SF   SF   SF   ARI  ARI  ARI  ARI  SF   SF   SF  
+## [47069] SF   SF   SF   SF   SF   SF   SF   SF   ARI  ARI  ARI  ARI  &lt;NA&gt; ARI 
+## [47083] ARI  SF   SF   SF   SF   SF   &lt;NA&gt; WAS  WAS  WAS  WAS  WAS  DAL  DAL 
+## [47097] DAL  DAL  DAL  DAL  DAL  DAL  DAL  DAL  WAS  WAS  WAS  WAS  WAS  WAS 
+## [47111] WAS  WAS  WAS  DAL  DAL  DAL  DAL  DAL  WAS  WAS  WAS  WAS  DAL  DAL 
+## [47125] DAL  DAL  DAL  DAL  DAL  DAL  DAL  DAL  DAL  DAL  WAS  WAS  WAS  WAS 
+## [47139] WAS  WAS  DAL  DAL  DAL  &lt;NA&gt; DAL  DAL  DAL  DAL  WAS  WAS  WAS  WAS 
+## [47153] WAS  WAS  WAS  WAS  WAS  DAL  DAL  DAL  DAL  DAL  DAL  DAL  &lt;NA&gt; DAL 
+## [47167] DAL  DAL  &lt;NA&gt; DAL  &lt;NA&gt; DAL  &lt;NA&gt; DAL  DAL  DAL  DAL  WAS  &lt;NA&gt; DAL 
+## [47181] DAL  DAL  DAL  DAL  DAL  DAL  DAL  DAL  DAL  DAL  DAL  DAL  WAS  WAS 
+## [47195] WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  DAL  DAL  DAL  DAL  DAL  DAL 
+## [47209] DAL  DAL  DAL  DAL  DAL  DAL  DAL  DAL  DAL  &lt;NA&gt; DAL  DAL  WAS  WAS 
+## [47223] WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  DAL  DAL  DAL  DAL  DAL  DAL 
+## [47237] DAL  DAL  DAL  DAL  DAL  DAL  DAL  DAL  WAS  WAS  WAS  WAS  WAS  DAL 
+## [47251] DAL  DAL  DAL  DAL  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  &lt;NA&gt;
+## [47265] &lt;NA&gt; WAS  &lt;NA&gt; WAS  WAS  &lt;NA&gt; WAS  WAS  DAL  DAL  &lt;NA&gt; DEN  DEN  DEN 
+## [47279] DEN  DEN  DEN  DEN  BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF 
+## [47293] BUF  BUF  BUF  DEN  DEN  DEN  DEN  DEN  BUF  BUF  BUF  BUF  BUF  BUF 
+## [47307] BUF  BUF  BUF  BUF  BUF  BUF  BUF  &lt;NA&gt; BUF  BUF  BUF  DEN  DEN  DEN 
+## [47321] DEN  DEN  DEN  DEN  DEN  DEN  DEN  DEN  BUF  BUF  BUF  BUF  BUF  BUF 
+## [47335] BUF  BUF  BUF  BUF  BUF  BUF  &lt;NA&gt; BUF  BUF  DEN  DEN  DEN  &lt;NA&gt; DEN 
+## [47349] DEN  DEN  DEN  &lt;NA&gt; DEN  &lt;NA&gt; DEN  &lt;NA&gt; BUF  BUF  BUF  BUF  BUF  BUF 
+## [47363] BUF  BUF  BUF  DEN  DEN  DEN  DEN  DEN  BUF  BUF  BUF  BUF  BUF  BUF 
+## [47377] BUF  BUF  BUF  BUF  BUF  BUF  DEN  DEN  DEN  DEN  DEN  DEN  BUF  BUF 
+## [47391] BUF  BUF  BUF  DEN  DEN  DEN  DEN  DEN  &lt;NA&gt; DEN  DEN  &lt;NA&gt; DEN  DEN 
+## [47405] BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF  &lt;NA&gt; BUF  &lt;NA&gt; BUF  BUF 
+## [47419] BUF  &lt;NA&gt; BUF  &lt;NA&gt; BUF  DEN  DEN  DEN  DEN  DEN  BUF  BUF  BUF  BUF 
+## [47433] BUF  BUF  &lt;NA&gt; GB   PHI  PHI  PHI  PHI  GB   GB   GB   GB   GB   PHI 
+## [47447] PHI  PHI  PHI  PHI  PHI  GB   GB   GB   GB   GB   GB   GB   PHI  PHI 
+## [47461] PHI  PHI  PHI  PHI  PHI  PHI  PHI  PHI  PHI  GB   GB   GB   GB   PHI 
+## [47475] PHI  PHI  PHI  PHI  PHI  GB   GB   GB   GB   GB   GB   GB   GB   GB  
+## [47489] GB   GB   GB   GB   GB   PHI  PHI  PHI  PHI  GB   GB   GB   GB   GB  
+## [47503] GB   GB   GB   PHI  &lt;NA&gt; PHI  PHI  PHI  PHI  GB   &lt;NA&gt; PHI  PHI  PHI 
+## [47517] PHI  PHI  PHI  PHI  GB   GB   GB   GB   GB   GB   GB   GB   GB   GB  
+## [47531] GB   GB   GB   GB   PHI  PHI  PHI  PHI  PHI  PHI  PHI  GB   GB   GB  
+## [47545] GB   GB   GB   GB   GB   GB   GB   GB   GB   PHI  PHI  PHI  PHI  PHI 
+## [47559] PHI  PHI  PHI  PHI  PHI  PHI  PHI  PHI  &lt;NA&gt; PHI  PHI  PHI  GB   GB  
+## [47573] GB   GB   GB   GB   PHI  &lt;NA&gt; PHI  PHI  &lt;NA&gt; PHI  PHI  &lt;NA&gt; PHI  GB  
+## [47587] GB   GB   GB   GB   GB   GB   PHI  PHI  PHI  PHI  &lt;NA&gt; LAC  LAC  LAC 
+## [47601] LAC  LAC  LAC  LAC  LAC  LAC  LAC  LAC  HOU  HOU  LAC  LAC  LAC  LAC 
+## [47615] LAC  LAC  HOU  HOU  HOU  HOU  HOU  LAC  LAC  LAC  LAC  LAC  LAC  LAC 
+## [47629] HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU  LAC  LAC  LAC  LAC  LAC  LAC 
+## [47643] HOU  HOU  HOU  LAC  HOU  HOU  HOU  HOU  HOU  LAC  LAC  LAC  LAC  LAC 
+## [47657] LAC  LAC  HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU 
+## [47671] &lt;NA&gt; HOU  HOU  HOU  LAC  LAC  LAC  &lt;NA&gt; LAC  LAC  HOU  HOU  &lt;NA&gt; HOU 
+## [47685] &lt;NA&gt; HOU  &lt;NA&gt; HOU  LAC  &lt;NA&gt; HOU  HOU  HOU  HOU  HOU  LAC  LAC  LAC 
+## [47699] LAC  LAC  HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU 
+## [47713] LAC  LAC  LAC  LAC  LAC  HOU  HOU  HOU  HOU  LAC  HOU  LAC  LAC  LAC 
+## [47727] LAC  LAC  LAC  HOU  HOU  HOU  HOU  LAC  LAC  LAC  LAC  LAC  HOU  HOU 
+## [47741] HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU  &lt;NA&gt; HOU  &lt;NA&gt; HOU 
+## [47755] &lt;NA&gt; HOU  HOU  LAC  LAC  LAC  LAC  LAC  LAC  HOU  HOU  HOU  HOU  HOU 
+## [47769] &lt;NA&gt; LA   LA   LA   LA   LA   LA   &lt;NA&gt; LA   LA   LA   LA   MIN  MIN 
+## [47783] MIN  MIN  MIN  LA   LA   LA   &lt;NA&gt; LA   LA   LA   LA   LA   MIN  MIN 
+## [47797] MIN  MIN  MIN  MIN  MIN  MIN  MIN  MIN  MIN  LA   LA   LA   LA   LA  
+## [47811] MIN  MIN  MIN  MIN  MIN  MIN  MIN  MIN  LA   LA   LA   LA   LA   MIN 
+## [47825] MIN  MIN  MIN  MIN  MIN  MIN  LA   MIN  MIN  MIN  MIN  MIN  MIN  MIN 
+## [47839] MIN  LA   &lt;NA&gt; LA   LA   LA   LA   LA   MIN  MIN  &lt;NA&gt; MIN  MIN  MIN 
+## [47853] MIN  MIN  MIN  MIN  LA   LA   LA   LA   LA   LA   LA   &lt;NA&gt; LA   LA  
+## [47867] LA   LA   MIN  MIN  MIN  MIN  MIN  MIN  MIN  MIN  MIN  LA   LA   LA  
+## [47881] LA   LA   LA   LA   MIN  MIN  MIN  MIN  MIN  MIN  MIN  MIN  MIN  MIN 
+## [47895] MIN  MIN  MIN  LA   LA   LA   LA   LA   LA   LA   LA   LA   MIN  MIN 
+## [47909] MIN  MIN  MIN  MIN  MIN  MIN  MIN  MIN  MIN  LA   &lt;NA&gt; LA   &lt;NA&gt; LA  
+## [47923] LA   LA   MIN  MIN  MIN  MIN  MIN  MIN  LA   LA   LA   &lt;NA&gt; PIT  PIT 
+## [47937] PIT  PIT  PIT  PIT  PIT  PIT  BAL  BAL  BAL  BAL  BAL  BAL  BAL  BAL 
+## [47951] BAL  BAL  BAL  BAL  BAL  BAL  BAL  PIT  PIT  PIT  PIT  PIT  BAL  BAL 
+## [47965] BAL  BAL  BAL  BAL  BAL  BAL  PIT  PIT  PIT  PIT  BAL  BAL  BAL  BAL 
+## [47979] BAL  BAL  BAL  BAL  BAL  BAL  BAL  BAL  BAL  BAL  BAL  PIT  PIT  PIT 
+## [47993] PIT  PIT  &lt;NA&gt; PIT  PIT  PIT  BAL  BAL  &lt;NA&gt; BAL  BAL  &lt;NA&gt; BAL  &lt;NA&gt;
+## [48007] BAL  BAL  BAL  &lt;NA&gt; BAL  BAL  PIT  PIT  &lt;NA&gt; BAL  BAL  BAL  BAL  BAL 
+## [48021] BAL  BAL  PIT  PIT  PIT  PIT  PIT  PIT  PIT  PIT  PIT  PIT  BAL  BAL 
+## [48035] BAL  BAL  BAL  BAL  PIT  PIT  PIT  PIT  PIT  PIT  PIT  BAL  BAL  BAL 
+## [48049] BAL  BAL  BAL  PIT  PIT  PIT  PIT  PIT  PIT  PIT  PIT  PIT  BAL  BAL 
+## [48063] BAL  BAL  BAL  BAL  BAL  BAL  BAL  BAL  BAL  PIT  PIT  PIT  PIT  PIT 
+## [48077] PIT  PIT  PIT  BAL  BAL  BAL  BAL  BAL  BAL  BAL  BAL  &lt;NA&gt; BAL  &lt;NA&gt;
+## [48091] BAL  BAL  BAL  &lt;NA&gt; TB   TB   TB   TB   TB   TB   TB   TB   TB   WAS 
+## [48105] WAS  WAS  WAS  WAS  WAS  WAS  WAS  TB   TB   TB   TB   TB   TB   TB  
+## [48119] WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  &lt;NA&gt; WAS  WAS 
+## [48133] WAS  &lt;NA&gt; WAS  WAS  WAS  WAS  WAS  TB   TB   TB   TB   TB   TB   WAS 
+## [48147] WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  TB   TB   TB  
+## [48161] TB   TB   TB   TB   &lt;NA&gt; TB   TB   TB   WAS  WAS  &lt;NA&gt; WAS  WAS  WAS 
+## [48175] WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  TB   TB   TB   TB   TB   TB  
+## [48189] TB   TB   TB   TB   TB   TB   TB   TB   TB   WAS  WAS  WAS  WAS  WAS 
+## [48203] WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  TB  
+## [48217] TB   TB   TB   &lt;NA&gt; WAS  WAS  WAS  WAS  WAS  TB   TB   TB   TB   TB  
+## [48231] TB   TB   TB   TB   WAS  WAS  WAS  WAS  WAS  WAS  WAS  &lt;NA&gt; WAS  WAS 
+## [48245] &lt;NA&gt; &lt;NA&gt; WAS  &lt;NA&gt; WAS  &lt;NA&gt; WAS  TB   &lt;NA&gt; BAL  BAL  BAL  BAL  BAL 
+## [48259] BAL  BAL  BAL  BAL  BAL  BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF 
+## [48273] BUF  BUF  BUF  BUF  BAL  BAL  BAL  BUF  BUF  BUF  BUF  BUF  BUF  BUF 
+## [48287] BAL  BAL  BAL  BAL  BAL  BAL  BAL  BAL  BAL  BAL  BUF  BUF  BUF  BUF 
+## [48301] BUF  BAL  BAL  BAL  BAL  &lt;NA&gt; BAL  BAL  BAL  BAL  BAL  BAL  BUF  BUF 
+## [48315] BUF  BUF  BUF  BUF  &lt;NA&gt; BUF  &lt;NA&gt; BUF  BUF  BUF  &lt;NA&gt; BUF  BUF  BAL 
+## [48329] BAL  &lt;NA&gt; BUF  BUF  BUF  BUF  BUF  BAL  BAL  BAL  BAL  BAL  BAL  BAL 
+## [48343] BAL  BAL  BAL  BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF  BAL  BAL  BAL 
+## [48357] BAL  BAL  BAL  BAL  BAL  BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF 
+## [48371] BUF  BUF  BUF  BAL  BAL  BAL  BAL  BAL  BAL  BAL  BUF  BUF  BUF  BUF 
+## [48385] BUF  BUF  BUF  BUF  &lt;NA&gt; BUF  &lt;NA&gt; BUF  &lt;NA&gt; BUF  BAL  BAL  BAL  BAL 
+## [48399] BAL  BAL  BAL  BAL  BAL  BAL  BUF  BUF  &lt;NA&gt; BUF  BUF  BUF  &lt;NA&gt; KC  
+## [48413] KC   KC   KC   KC   HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU 
+## [48427] HOU  KC   KC   KC   KC   KC   KC   KC   KC   KC   KC   KC   KC   HOU 
+## [48441] HOU  HOU  HOU  HOU  HOU  HOU  HOU  KC   KC   KC   KC   KC   KC   KC  
+## [48455] KC   KC   HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU  KC   KC   KC   KC  
+## [48469] KC   KC   HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU  &lt;NA&gt; HOU  HOU  &lt;NA&gt;
+## [48483] HOU  KC   KC   &lt;NA&gt; HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU 
+## [48497] HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU  HOU  KC   KC   KC   KC  
+## [48511] KC   KC   KC   KC   KC   KC   KC   KC   KC   KC   KC   KC   KC   HOU 
+## [48525] HOU  HOU  HOU  HOU  HOU  HOU  KC   KC   KC   KC   HOU  HOU  HOU  HOU 
+## [48539] KC   KC   KC   KC   KC   &lt;NA&gt; KC   KC   HOU  HOU  HOU  HOU  HOU  HOU 
+## [48553] HOU  HOU  HOU  HOU  HOU  HOU  &lt;NA&gt; HOU  KC   &lt;NA&gt; KC   KC   &lt;NA&gt; KC  
+## [48567] HOU  HOU  HOU  &lt;NA&gt; PHI  PHI  PHI  PHI  PHI  PHI  PHI  PHI  LA   LA  
+## [48581] LA   LA   LA   LA   LA   LA   LA   LA   LA   LA   LA   LA   LA   PHI 
+## [48595] PHI  PHI  PHI  PHI  LA   LA   LA   LA   PHI  PHI  PHI  PHI  PHI  LA  
+## [48609] LA   LA   LA   LA   LA   LA   LA   LA   PHI  PHI  PHI  PHI  PHI  PHI 
+## [48623] PHI  PHI  PHI  PHI  LA   LA   LA   LA   LA   LA   PHI  PHI  PHI  PHI 
+## [48637] PHI  PHI  PHI  PHI  PHI  PHI  &lt;NA&gt; PHI  PHI  &lt;NA&gt; PHI  &lt;NA&gt; &lt;NA&gt; PHI 
+## [48651] &lt;NA&gt; LA   LA   LA   LA   LA   PHI  PHI  PHI  PHI  LA   LA   LA   LA  
+## [48665] LA   LA   LA   LA   PHI  PHI  PHI  PHI  PHI  PHI  PHI  PHI  PHI  PHI 
+## [48679] PHI  LA   LA   LA   LA   LA   PHI  PHI  LA   LA   LA   LA   PHI  PHI 
+## [48693] PHI  PHI  PHI  LA   LA   LA   LA   LA   LA   LA   PHI  PHI  PHI  PHI 
+## [48707] PHI  PHI  PHI  PHI  LA   LA   LA   LA   LA   PHI  PHI  LA   LA   LA  
+## [48721] LA   LA   LA   LA   LA   LA   LA   LA   LA   PHI  PHI  &lt;NA&gt; PHI  &lt;NA&gt;
+## [48735] PHI  &lt;NA&gt; PHI  LA   LA   LA   LA   LA   LA   LA   LA   LA   LA   LA  
+## [48749] PHI  PHI  &lt;NA&gt; DET  DET  DET  DET  DET  WAS  WAS  WAS  WAS  WAS  WAS 
+## [48763] WAS  WAS  WAS  DET  DET  DET  DET  DET  DET  DET  WAS  WAS  WAS  WAS 
+## [48777] WAS  WAS  WAS  WAS  WAS  WAS  WAS  DET  DET  DET  DET  DET  DET  WAS 
+## [48791] WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  DET 
+## [48805] DET  DET  DET  DET  DET  DET  DET  DET  WAS  WAS  WAS  WAS  WAS  DET 
+## [48819] DET  DET  DET  WAS  DET  DET  DET  DET  DET  DET  WAS  WAS  WAS  WAS 
+## [48833] WAS  WAS  &lt;NA&gt; WAS  WAS  WAS  DET  DET  DET  DET  DET  DET  DET  &lt;NA&gt;
+## [48847] &lt;NA&gt; DET  WAS  &lt;NA&gt; WAS  WAS  WAS  WAS  WAS  WAS  DET  DET  DET  DET 
+## [48861] DET  DET  DET  DET  DET  DET  DET  DET  DET  WAS  WAS  WAS  WAS  WAS 
+## [48875] WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS 
+## [48889] DET  DET  DET  DET  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS 
+## [48903] DET  DET  DET  DET  DET  DET  DET  DET  DET  DET  DET  WAS  WAS  WAS 
+## [48917] &lt;NA&gt; &lt;NA&gt; WAS  WAS  &lt;NA&gt; WAS  &lt;NA&gt; WAS  &lt;NA&gt; WAS  DET  DET  DET  DET 
+## [48931] DET  DET  DET  DET  DET  DET  DET  DET  WAS  WAS  &lt;NA&gt; BUF  BUF  BUF 
+## [48945] BUF  BUF  KC   KC   KC   KC   KC   KC   KC   KC   KC   KC   BUF  BUF 
+## [48959] BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF  KC   KC   KC   KC  
+## [48973] KC   KC   KC   KC   BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF 
+## [48987] BUF  BUF  BUF  KC   KC   KC   KC   &lt;NA&gt; KC   KC   KC   KC   KC   KC  
+## [49001] &lt;NA&gt; KC   KC   KC   BUF  BUF  BUF  BUF  BUF  KC   KC   KC   KC   KC  
+## [49015] KC   KC   BUF  BUF  BUF  BUF  BUF  BUF  BUF  &lt;NA&gt; BUF  BUF  BUF  BUF 
+## [49029] KC   KC   &lt;NA&gt; KC   KC   KC   KC   KC   KC   KC   KC   KC   KC   KC  
+## [49043] BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF  KC  
+## [49057] KC   KC   KC   KC   KC   BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF  BUF 
+## [49071] BUF  KC   KC   KC   KC   KC   KC   BUF  BUF  BUF  BUF  BUF  BUF  BUF 
+## [49085] BUF  &lt;NA&gt; BUF  BUF  BUF  KC   KC   KC   KC   KC   KC   KC   KC   KC  
+## [49099] BUF  BUF  BUF  BUF  BUF  BUF  BUF  KC   &lt;NA&gt; KC   &lt;NA&gt; KC   &lt;NA&gt; KC  
+## [49113] &lt;NA&gt; KC   KC   KC   KC   &lt;NA&gt; WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS 
+## [49127] WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  PHI  PHI  PHI 
+## [49141] WAS  WAS  WAS  WAS  WAS  PHI  PHI  PHI  PHI  PHI  PHI  PHI  WAS  WAS 
+## [49155] WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  PHI  PHI  PHI  PHI 
+## [49169] PHI  PHI  PHI  PHI  PHI  PHI  PHI  PHI  &lt;NA&gt; PHI  PHI  WAS  WAS  WAS 
+## [49183] WAS  WAS  WAS  PHI  PHI  PHI  PHI  PHI  PHI  PHI  PHI  PHI  PHI  PHI 
+## [49197] &lt;NA&gt; PHI  PHI  PHI  PHI  PHI  WAS  PHI  PHI  PHI  PHI  PHI  &lt;NA&gt; PHI 
+## [49211] &lt;NA&gt; PHI  PHI  WAS  WAS  WAS  WAS  WAS  &lt;NA&gt; WAS  &lt;NA&gt; WAS  PHI  &lt;NA&gt;
+## [49225] PHI  PHI  PHI  PHI  PHI  WAS  WAS  WAS  WAS  PHI  PHI  PHI  PHI  PHI 
+## [49239] WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  WAS  PHI  PHI  PHI  PHI 
+## [49253] PHI  PHI  PHI  PHI  PHI  WAS  WAS  WAS  WAS  WAS  PHI  PHI  PHI  PHI 
+## [49267] PHI  PHI  PHI  PHI  PHI  PHI  PHI  WAS  WAS  WAS  WAS  WAS  WAS  WAS 
+## [49281] WAS  WAS  PHI  PHI  PHI  PHI  PHI  PHI  WAS  WAS  WAS  WAS  WAS  WAS 
+## [49295] WAS  WAS  WAS  WAS  WAS  WAS  PHI  &lt;NA&gt; PHI  &lt;NA&gt; PHI  PHI  PHI  PHI 
+## [49309] WAS  WAS  WAS  WAS  WAS  PHI  PHI  PHI 
 ## 32 Levels: ARI ATL BAL BUF CAR CHI CIN CLE DAL DEN DET GB HOU IND JAX KC ... WAS</code></pre>
-<pre class="r"><code>team_info&lt;-teams_colors_logos
-
-df_off &lt;- pbp %&gt;%
-  filter(season_type == &quot;REG&quot;, down %in% c(1, 2, 3, 4), punt_attempt == 0) %&gt;%
-  group_by(posteam, game_id )%&gt;%
-  summarise(
-    OFF_EPA = mean(epa, na.rm = TRUE),
-    QB_EPA = mean(qb_epa,na.rm = TRUE),
-    QB = max(passer_player_name,na.rm = TRUE),
-    fumble = sum(fumble_lost),
-    interception = sum(interception),
-    pass_ypa = sum(passing_yards,na.rm = TRUE)/sum(pass_attempt,na.rm = TRUE),
-    rush_ypa = sum(rushing_yards,na.rm = TRUE)/sum(rush_attempt,na.rm = TRUE),
-    pass_yds = sum(passing_yards,na.rm = TRUE),
-    rush_yds = sum(rushing_yards,na.rm = TRUE),
-    ypp = sum(sum(rushing_yards,na.rm = TRUE) + sum(passing_yards,na.rm = TRUE))/n(),
-    drives = max(drive,na.rm = TRUE)/2,
-    #    home_points = max(home_score,na.rm = TRUE),
-    #    away_points = max(away_score,na.rm = TRUE),
-    home_team = max(home_team,na.rm = TRUE),
-    pressures_allowed = (sum(sack,na.rm = TRUE)+sum(qb_hit,na.rm = TRUE) ), 
-    total_plays_off = n(),
-    points = if_else(max(posteam,na.rm = TRUE) == max(home_team,na.rm = TRUE), max(home_score,na.rm = TRUE),max(away_score,na.rm = TRUE))
-    
-  )</code></pre>
 <pre><code>## `summarise()` has grouped output by &#39;posteam&#39;. You can override using the
 ## `.groups` argument.</code></pre>
-<pre class="r"><code>df_def&lt;- pbp %&gt;%
-  filter(season_type == &quot;REG&quot;, down %in% c(1, 2, 3, 4), punt_attempt == 0) %&gt;%
-  group_by(defteam, game_id )%&gt;%
-  summarise(
-    OFF_EPA_allowed = mean(epa, na.rm = TRUE),
-    QB_EPA_allowed = mean(qb_epa,na.rm = TRUE),
-    #QB = max(passer_player_name,na.rm = TRUE),
-    fumbles_forced = sum(fumble_lost),
-    interceptions_forced = sum(interception),
-    pass_ypa_allowed = sum(passing_yards,na.rm = TRUE)/sum(pass_attempt,na.rm = TRUE),
-    rush_ypa_allowed = sum(rushing_yards,na.rm = TRUE)/sum(rush_attempt,na.rm = TRUE),
-    pass_yds_allowed = sum(passing_yards,na.rm = TRUE),
-    rush_yds_allowed = sum(rushing_yards,na.rm = TRUE),
-    ypp_allowed = sum(sum(rushing_yards,na.rm = TRUE) + sum(passing_yards,na.rm = TRUE))/n(),
-    drives_allowed = max(drive,na.rm = TRUE)/2,
-    #    home_points = max(home_score,na.rm = TRUE),
-    #    away_points = max(away_score,na.rm = TRUE),
-    away_team = max(away_team,na.rm = TRUE),
-    pressures_forced = (sum(sack,na.rm = TRUE)+sum(qb_hit,na.rm = TRUE) ), 
-    total_plays_def = n(),
-    points_allowed = if_else(max(defteam,na.rm = TRUE) == max(home_team,na.rm = TRUE), max(away_score,na.rm = TRUE),max(home_score,na.rm = TRUE))
-    
-    
-  )</code></pre>
 <pre><code>## `summarise()` has grouped output by &#39;defteam&#39;. You can override using the
-## `.groups` argument.</code></pre>
-<pre class="r"><code>df&lt;-cbind(df_off,df_def)</code></pre>
-<pre><code>## New names:
-## • `game_id` -&gt; `game_id...2`
-## • `game_id` -&gt; `game_id...19`</code></pre>
-<pre class="r"><code>off &lt;- df %&gt;% 
-  group_by(posteam) %&gt;% 
-  summarise(
-    EPA = mean(OFF_EPA),
-    ypp = median(ypp)
-  )
-
-
-def &lt;- df %&gt;% 
-  group_by(defteam) %&gt;% 
-  summarise(
-    EPA_allowed = mean(OFF_EPA_allowed),
-    ypp_allowed = median(ypp_allowed)
-  )
-
-agg &lt;- off %&gt;% 
-  inner_join(def, c(&#39;posteam&#39;=&#39;defteam&#39;))
-
-agg$EPA &lt;-rank(-agg$EPA)
-agg$EPA_allowed &lt;-rank(agg$EPA_allowed)
-
-
-schedule[&#39;Home_EPA&#39;]&lt;-0
-schedule[&#39;Away_EPA&#39;]&lt;-0
-schedule[&#39;Home_EPA_Allowed&#39;]&lt;-0
-schedule[&#39;Away_EPA_Allowed&#39;]&lt;-0
-schedule[&#39;Home&#39;]&lt;-&quot;&quot;
-schedule[&#39;Away&#39;]&lt;-&quot;&quot;
-schedule[&#39;Home_Proj&#39;]&lt;-0
-schedule[&#39;Away_Proj&#39;]&lt;-0
-schedule[&#39;Home_Record&#39;]&lt;-&quot;&quot;
-schedule[&#39;Away_Record&#39;]&lt;-&quot;&quot;
-schedule[&#39;Home_YPP&#39;]&lt;-0
-schedule[&#39;Away_YPP&#39;]&lt;-0</code></pre>
+## `.groups` argument.
+## New names:</code></pre>
 <pre class="r"><code>for (j in 1:nrow(schedule)){
   schedule$Home_EPA[j]&lt;-round(pull(agg[which(agg$posteam == schedule$home_team[j]),&#39;EPA&#39;]),2)
   schedule$Away_EPA[j]&lt;-round(pull(agg[which(agg$posteam == schedule$away_team[j]),&#39;EPA&#39;]),2)
@@ -5281,14 +5393,28 @@ NFL_table_clean &lt;- schedule %&gt;%
     
   )
 
-NFL_table_clean&lt;-NFL_table_clean %&gt;% filter(!is.na(Home_Proj))
+#NFL_table_clean&lt;-NFL_table_clean %&gt;% filter(!is.na(Home_Proj))
 show_data&lt;-NFL_table_clean
 # show_data&lt;-NFL_table_clean %&gt;% 
 #    filter(Home == &quot;Commanders&quot;)</code></pre>
 <pre class="r"><code>## -------------------- use for creating show previews -------------------- ##
-# 
-show_data&lt;-NFL_table_clean %&gt;%
-  filter(Home == &quot;Ravens&quot;)</code></pre>
+#
+
+
+# show_data$Away_Proj[1]&lt;-20.5
+
+# show_data&lt;-NFL_table_clean %&gt;%
+#   filter(Home == &quot;Chiefs&quot;)
+
+show_data$Home_Proj[1]&lt;-21.0
+show_data$Away_Proj[1]&lt;-20.9
+# show_data$Home_Proj[1]&lt;-22.59
+# show_data$Away_Proj[1]&lt;-20.18
+# show_data$Home_Proj[1]&lt;-24.8
+# show_data$Away_Proj[1]&lt;-20.3
+# show_data$Home_Proj[4]&lt;-22.98
+# show_data$Away_Proj[4]&lt;-24.33
+# </code></pre>
 <pre class="r"><code>### Horizontal bar chart to display points scored and points against
 ### Horizontal bar chart to display points scored and points against
 ### Horizontal bar chart to display points scored and points against
@@ -5368,7 +5494,7 @@ table &lt;-
           cell = function(value) {
           ### Normalize team rating in order to assign color from color palette
             normalized &lt;-
-              (value - min(unlist(NFL_table_clean$Home_EPA))) / (max(unlist(NFL_table_clean$Home_EPA)) - min(unlist(NFL_table_clean$Home_EPA)))
+              (value - min(unlist(agg$EPA))) / (max(unlist(agg$EPA)) - min(unlist(agg$EPA)))
             color &lt;- off_rating_color(normalized)
             value &lt;- format(value, nsmall = 1, digits = 1)
             ### Round corners of cell
@@ -5381,9 +5507,9 @@ table &lt;-
           name = &quot;EPA Allowed&quot;,
           cell = function(value) {
           ### Normalize team rating in order to assign color from color palette
-            normalized &lt;- (value - min(unlist(NFL_table_clean$Home_EPA_Allowed))) / 
-              (max(unlist(NFL_table_clean$Home_EPA_Allowed)) - min(unlist(NFL_table_clean$Home_EPA_Allowed)))
-            
+            normalized &lt;- (value - min(unlist(agg$EPA_allowed))) / 
+               (max(unlist(agg$EPA_allowed)) - min(unlist(agg$EPA_allowed)))
+            # 
             color &lt;- def_rating_color(normalized)
             value &lt;- format(value, nsmall = 1, digits = 1)
             ### Round corners of cell
@@ -5529,8 +5655,8 @@ table &lt;-
           name = &quot;EPA Allowed&quot;,
           cell = function(value) {
           ### Normalize team rating in order to assign color from color palette
-            normalized &lt;- (value - min(unlist(NFL_table_clean$Away_EPA_Allowed))) / 
-              (max(unlist(NFL_table_clean$Away_EPA_Allowed)) - min(unlist(NFL_table_clean$Away_EPA_Allowed)))
+            normalized &lt;- (value - min(unlist(agg$EPA_allowed))) / 
+              (max(unlist(agg$EPA_allowed)) - min(unlist(agg$EPA_allowed)))
             
             color &lt;- def_rating_color(normalized)
             value &lt;- format(value, nsmall = 1, digits = 1)
@@ -5545,8 +5671,7 @@ table &lt;-
           name = &quot;EPA&quot;,
           cell = function(value) {
           ### Normalize team rating in order to assign color from color palette
-            normalized &lt;-
-              (value - min(unlist(NFL_table_clean$Away_EPA))) / (max(unlist(NFL_table_clean$Away_EPA)) - min(unlist(NFL_table_clean$Away_EPA)))
+            normalized &lt;-(value - min(unlist(agg$EPA))) / (max(unlist(agg$EPA)) - min(unlist(agg$EPA)))
             color &lt;- off_rating_color(normalized)
             value &lt;- format(value, nsmall = 1, digits = 1)
             ### Round corners of cell
@@ -5611,8 +5736,8 @@ div(class = &quot;team-ratings&quot;,
 <h2>2024 NFL Projections (Week 3)</h2>
 Game Projections the 2024 NFL season
 </div>
-<div class="reactable html-widget html-fill-item" id="htmlwidget-d15f17dc383d066d7825" style="width:auto;height:auto;"></div>
-<script type="application/json" data-for="htmlwidget-d15f17dc383d066d7825">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"Home_EPA":[1],"Home_EPA_Allowed":[18],"Home":["Ravens"],"Home_YPP":[6.35],"Home_Proj":[28.32],"Away_Proj":[13.71],"Away_YPP":[4.48],"Away":["Browns"],"Away_EPA_Allowed":[11],"Away_EPA":[32],"Home_Record":["11-5"],"Away_Record":["3-13"]},"columns":[{"id":"Home_EPA","name":"EPA","type":"numeric","headerClassName":"header colheader","cell":[{"name":"div","attribs":{"style":{"background":"#EF8A62"},"className":"roundcorners"},"children":["1.0"]}],"maxWidth":75,"align":"center","className":"cell number","headerStyle":{"fontWeight":"500"}},{"id":"Home_EPA_Allowed","name":"EPA Allowed","type":"numeric","headerClassName":"header colheader","cell":[{"name":"div","attribs":{"style":{"background":"#E3F0F2"},"className":"roundcorners"},"children":["18.0"]}],"maxWidth":75,"align":"center","className":"cell number","headerStyle":{"fontWeight":"500"}},{"id":"Home","name":"Home","type":"character","headerClassName":"header colheader","cell":[{"name":"div","attribs":{"className":"team"},"children":[{"name":"img","attribs":{"src":"data:image/png;base64,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","alt":"Ravens","className":"logo"},"children":[]},{"name":"div","attribs":{"className":"team-name"},"children":["Ravens"]},{"name":"div","attribs":{"className":"record"},"children":["(11-5)"]}]}],"minWidth":100,"maxWidth":250,"align":"center","className":"cell"},{"id":"Home_YPP","name":"Home_YPP","type":"numeric","headerClassName":"header colheader","maxWidth":55,"className":"cell number border-left","style":[{"color":"#008000"}],"headerStyle":{"fontWeight":"500"}},{"id":"Home_Proj","name":"Home_Proj","type":"numeric","headerClassName":"header colheader","maxWidth":55,"className":"cell number border-left","style":[{"color":"#008000"}],"headerStyle":{"fontWeight":"500"}},{"id":"Away_Proj","name":"Away_Proj","type":"numeric","headerClassName":"header colheader","maxWidth":55,"className":"cell number border-right ","style":[{"color":"#e00000"}],"headerStyle":{"fontWeight":"500"}},{"id":"Away_YPP","name":"Away_YPP","type":"numeric","headerClassName":"header colheader","maxWidth":55,"className":"cell number border-right","style":[{"color":"#e00000"}],"headerStyle":{"fontWeight":"500"}},{"id":"Away","name":"Away","type":"character","headerClassName":"header colheader","cell":[{"name":"div","attribs":{"className":"team"},"children":[{"name":"img","attribs":{"src":"data:image/png;base64,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","alt":"Browns","className":"logo"},"children":[]},{"name":"div","attribs":{"className":"team-name"},"children":["Browns"]},{"name":"div","attribs":{"className":"record"},"children":["(3-13)"]}]}],"minWidth":100,"maxWidth":250,"align":"center","className":"cell"},{"id":"Away_EPA_Allowed","name":"EPA Allowed","type":"numeric","headerClassName":"header colheader","cell":[{"name":"div","attribs":{"style":{"background":"#F4D3C2"},"className":"roundcorners"},"children":["11.0"]}],"maxWidth":75,"align":"center","className":"cell number","headerStyle":{"fontWeight":"500"}},{"id":"Away_EPA","name":"EPA","type":"numeric","headerClassName":"header colheader","cell":[{"name":"div","attribs":{"style":{"background":"#67A9CF"},"className":"roundcorners"},"children":["32.0"]}],"maxWidth":75,"align":"center","className":"cell number","headerStyle":{"fontWeight":"500"}},{"id":"Home_Record","name":"Home_Record","type":"character","headerClassName":"header colheader","show":false},{"id":"Away_Record","name":"Away_Record","type":"character","headerClassName":"header colheader","show":false}],"columnGroups":[{"name":"Home Team Ranks","headerClassName":"groupheader","columns":["Home_EPA","Home_EPA_Allowed"]},{"name":"Away Team Ranks","headerClassName":"groupheader","columns":["Away_EPA","Away_EPA_Allowed"]}],"pagination":false,"highlight":true,"compact":true,"showSortIcon":false,"dataKey":"d8f597fe8e848e390c95565372e35db9"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script>
+<div class="reactable html-widget html-fill-item" id="htmlwidget-4c0abc64ee1f39326ba6" style="width:auto;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-4c0abc64ee1f39326ba6">{"x":{"tag":{"name":"Reactable","attribs":{"data":{"Home_EPA":[6],"Home_EPA_Allowed":[3],"Home":["Eagles"],"Home_YPP":[5.39],"Home_Proj":[21],"Away_Proj":[20.9],"Away_YPP":[4.88],"Away":["Chiefs"],"Away_EPA_Allowed":[14],"Away_EPA":[10],"Home_Record":["14-3"],"Away_Record":["15-2"]},"columns":[{"id":"Home_EPA","name":"EPA","type":"numeric","headerClassName":"header colheader","cell":[{"name":"div","attribs":{"style":{"background":"#F1AE92"},"className":"roundcorners"},"children":["6.0"]}],"maxWidth":75,"align":"center","className":"cell number","headerStyle":{"fontWeight":"500"}},{"id":"Home_EPA_Allowed","name":"EPA Allowed","type":"numeric","headerClassName":"header colheader","cell":[{"name":"div","attribs":{"style":{"background":"#F09875"},"className":"roundcorners"},"children":["3.0"]}],"maxWidth":75,"align":"center","className":"cell number","headerStyle":{"fontWeight":"500"}},{"id":"Home","name":"Home","type":"character","headerClassName":"header colheader","cell":[{"name":"div","attribs":{"className":"team"},"children":[{"name":"img","attribs":{"src":"data:image/png;base64,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","alt":"Eagles","className":"logo"},"children":[]},{"name":"div","attribs":{"className":"team-name"},"children":["Eagles"]},{"name":"div","attribs":{"className":"record"},"children":["(14-3)"]}]}],"minWidth":100,"maxWidth":250,"align":"center","className":"cell"},{"id":"Home_YPP","name":"Home_YPP","type":"numeric","headerClassName":"header colheader","maxWidth":55,"className":"cell number border-left","style":[{"color":"#008000"}],"headerStyle":{"fontWeight":"500"}},{"id":"Home_Proj","name":"Home_Proj","type":"numeric","headerClassName":"header colheader","maxWidth":55,"className":"cell number border-left","style":[{"color":"#008000"}],"headerStyle":{"fontWeight":"500"}},{"id":"Away_Proj","name":"Away_Proj","type":"numeric","headerClassName":"header colheader","maxWidth":55,"className":"cell number border-right ","style":[{"color":"#008000"}],"headerStyle":{"fontWeight":"500"}},{"id":"Away_YPP","name":"Away_YPP","type":"numeric","headerClassName":"header colheader","maxWidth":55,"className":"cell number border-right","style":[{"color":"#e00000"}],"headerStyle":{"fontWeight":"500"}},{"id":"Away","name":"Away","type":"character","headerClassName":"header colheader","cell":[{"name":"div","attribs":{"className":"team"},"children":[{"name":"img","attribs":{"src":"data:image/png;base64,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","alt":"Chiefs","className":"logo"},"children":[]},{"name":"div","attribs":{"className":"team-name"},"children":["Chiefs"]},{"name":"div","attribs":{"className":"record"},"children":["(15-2)"]}]}],"minWidth":100,"maxWidth":250,"align":"center","className":"cell"},{"id":"Away_EPA_Allowed","name":"EPA Allowed","type":"numeric","headerClassName":"header colheader","cell":[{"name":"div","attribs":{"style":{"background":"#F6E9DF"},"className":"roundcorners"},"children":["14.0"]}],"maxWidth":75,"align":"center","className":"cell number","headerStyle":{"fontWeight":"500"}},{"id":"Away_EPA","name":"EPA","type":"numeric","headerClassName":"header colheader","cell":[{"name":"div","attribs":{"style":{"background":"#F4CCB9"},"className":"roundcorners"},"children":["10.0"]}],"maxWidth":75,"align":"center","className":"cell number","headerStyle":{"fontWeight":"500"}},{"id":"Home_Record","name":"Home_Record","type":"character","headerClassName":"header colheader","show":false},{"id":"Away_Record","name":"Away_Record","type":"character","headerClassName":"header colheader","show":false}],"columnGroups":[{"name":"Home Team Ranks","headerClassName":"groupheader","columns":["Home_EPA","Home_EPA_Allowed"]},{"name":"Away Team Ranks","headerClassName":"groupheader","columns":["Away_EPA","Away_EPA_Allowed"]}],"pagination":false,"highlight":true,"compact":true,"showSortIcon":false,"dataKey":"e1b952ab6db7827c8f9a0a29d16e9fbe"},"children":[]},"class":"reactR_markup"},"evals":[],"jsHooks":[]}</script>
 <span style="color:#777">
 Note: EPA ranks are adusted ranks for the current season based on concluded games
 <div>Table created by: Statletics  •  Data: Pro-Football-Reference.com</div>

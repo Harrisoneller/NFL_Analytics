@@ -17,6 +17,7 @@ library(gtExtras)
 library(nflverse)
 
 ### prelim ###
+week=17
 YPP<-function(season=2024,week){
 
 info <- nflfastR::teams_colors_logos
@@ -287,3 +288,23 @@ return(ypp_proj)
 
   
 }
+
+# y<-YPP(2024,week=17)
+# 
+# 
+# y$home_spread <- -(y$home_ypp_diff - y$away_ypp_diff)/.2
+# 
+# odd_home <- y$home[seq(1, nrow(y), by = 2)]
+# even_home<- y$home[seq(2, nrow(y), by = 2)]
+# odd_away <- y$away[seq(1, nrow(y), by = 2)]
+# even_away<- y$away[seq(2, nrow(y), by = 2)]
+# 
+# result <- y %>%
+#   mutate(group = ceiling(row_number() / 2)) %>% # Create a grouping variable
+#   group_by(group) %>%                           # Group every two rows
+#   summarize(across(everything(), mean), .groups = "drop") # Compute the average
+# 
+# result['home']<-odd_home
+# result['away']<-odd_away
+# 
+# result
