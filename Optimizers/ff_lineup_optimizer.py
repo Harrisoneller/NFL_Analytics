@@ -3,7 +3,7 @@ import pandas as pd
 # Load the rankings CSV (assumes it contains rankings for all positions: QB, RB, WR, TE, K, DST)
 # Columns: Rank,Player Name,Team,Position,ECR,vs. ECR
 # Use ECR as the ranking metric (lower is better)
-df = pd.read_csv('FantasyPros-expert-rankings-2.csv', skiprows=4, index_col=False)
+df = pd.read_csv('FantasyPros-expert-rankings-4.csv', skiprows=4, index_col=False)
 # Clean up any extra spaces in column names if needed
 df.columns = df.columns.str.strip()
 
